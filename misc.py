@@ -1,0 +1,61 @@
+import json
+import os
+
+import whisper
+import openai
+import psycopg2
+import os
+import dotenv
+
+dotenv.load_dotenv()
+
+
+def get_annotation(pipeline) -> str:
+    conn = psycopg2.connect(
+        host=os.getenv('DB_HOST'),
+        database=os.getenv('DB_NAME'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD')
+    )
+    cur = conn.cursor()
+    cur.execute("SELECT text FROM pipelines WHERE pipeline=%s", (pipeline,))
+    resp = cur.fetchone()
+    conn.close()
+    return resp
+
+
+def has_russian_symbols(text, alphabet=set('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')):
+    return not alphabet.isdisjoint(text.lower())
+
+
+def translate_to_russian(text):
+    if has_russian_symbols(text):
+        return text
+    messages = [
+        {'role': 'assistant', 'content': "Переведи текст на русский язык"},
+        {'role': 'user', 'content': text}
+    ]
+    response = openai.ChatCompletion.create(
+        model='gpt-3.5-turbo',
+        messages=messages
+    )['choices'][0]['message']['content']
+    return response
+
+
+def wisper_detect(link: str):
+    import requests
+    r = requests.get(link, allow_redirects=True)
+    open('file.m4a', 'wb').write(r.content)
+    model = whisper.load_model("base")
+
+    # load audio and pad/trim it to fit 30 seconds
+    audio = whisper.load_audio('file.m4a')
+    audio = whisper.pad_or_trim(audio)
+
+    # make log-Mel spectrogram and move to the same device as the model
+    mel = whisper.log_mel_spectrogram(audio).to(model.device)
+    _, probs = model.detect_language(mel)
+    print(f"Detected language: {max(probs, key=probs.get)}")
+    options = whisper.DecodingOptions(fp16=False)
+    result = whisper.decode(model, mel, options)
+    return result.text
