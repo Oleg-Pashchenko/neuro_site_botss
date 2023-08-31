@@ -56,9 +56,6 @@ def main():
     user_id_hash = request_dict['message[add][0][chat_id]']
     if int(request_dict['message[add][0][created_at]']) + 30 < int(time.time()): return 'ok'
     print('success')
-    if 'message[add][0][attachment][link]' in request_dict.keys():
-        print('Voice message detected!')
-        text = misc.wisper_detect(request_dict['message[add][0][attachment][link]'])
 
     bred = json.load(open('users_db.json', 'r', encoding='UTF-8'))
     pipeline, pipeline_name = request_dict['message[add][0][entity_id]'], bred[
@@ -66,11 +63,17 @@ def main():
 
     print('Pipeline:', pipeline, 'ChatId:', user_id, 'Pipeline_name', pipeline_name)
     if pipeline is None: return 'ok'
+    params = misc.get_params(pipeline_name)
 
+    if 'message[add][0][attachment][link]' in request_dict.keys():
+        print('Voice message detected!')
+        if params[6] == 1:
+            text = misc.wisper_detect(request_dict['message[add][0][attachment][link]'])
+        else:
+            return 'ok'
     if text == '/restart':
         db.clear_history(user_id)
         return 'ok'
-    print(pipeline_name)
     messages = [{"role": "system", "content": misc.get_annotation(pipeline_name)}]
 
     db.add_message(user_id, text, 'user')
@@ -80,9 +83,14 @@ def main():
     print('Q_T:', translation)
     messages += db.read_history(user_id)
     print('Message history length:', len(messages))
+    model_to_use = params[2]
+    if params[3] != '':
+        model_to_use = params[3]
     response = openai.ChatCompletion.create(
-        model='gpt-3.5-turbo-16k',
-        messages=messages
+        model=model_to_use,
+        messages=messages,
+        max_tokens=params[4],
+        temperature=params[5]
     )['choices'][0]['message']['content']
 
     response = response.replace('[ссылка]', '').replace('[link]', '')
@@ -97,4 +105,3 @@ def main():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True, port=8000)
-

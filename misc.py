@@ -24,6 +24,20 @@ def get_annotation(pipeline) -> str:
     return resp[0]
 
 
+def get_params(pipeline):
+    conn = psycopg2.connect(
+        host=os.getenv('DB_HOST'),
+        database=os.getenv('DB_NAME'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD')
+    )
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM pipelines WHERE pipeline_id=%s", (pipeline,))
+    resp = cur.fetchone()
+    conn.close()
+    return resp
+
+
 def has_russian_symbols(text, alphabet=set('абвгдеёжзийклмнопрстуфхцчшщъыьэюя')):
     return not alphabet.isdisjoint(text.lower())
 
