@@ -94,7 +94,7 @@ def send_message(receiver_id: str, message: str, token=''):
     while True:
         try:
             headers = {'X-Auth-Token': token}
-            url = f'https://amojo.amocrm.ru/v1/chats/{os.getenv("1  99ACCOUNT_CHAT_ID")}/' \
+            url = f'https://amojo.amocrm.ru/v1/chats/{os.getenv("ACCOUNT_CHAT_ID")}/' \
                   f'{receiver_id}/messages?with_video=true&stand=v15'
             response = requests.post(url, headers=headers, data=json.dumps({"text": message}))
             print(response.status_code)
