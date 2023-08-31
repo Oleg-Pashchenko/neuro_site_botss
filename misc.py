@@ -21,6 +21,7 @@ def get_annotation(pipeline) -> str:
     cur.execute("SELECT text FROM pipelines WHERE pipeline_id=%s", (pipeline,))
     resp = cur.fetchone()
     conn.close()
+    print(resp)
     return resp
 
 
