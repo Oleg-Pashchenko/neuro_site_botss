@@ -5,13 +5,9 @@ import time
 import bs4
 import requests
 
-mail = 'odpash.itmo@gmail.com'
-host = 'https://appgpt.amocrm.ru/'
-host_2 = 'appgpt.amocrm.ru'
-password = "developer2023"
 
-
-def get_token():
+def get_token(host, mail, password):
+    host_2 = host.replace('https://', '').replace('/', '')
     try:
         session = requests.Session()
         response = session.get(host)
@@ -47,13 +43,13 @@ def get_token():
     except Exception as e:
         print(e)
         time.sleep(3)
-        return get_token()
+        return get_token(host, mail, password)
     print('Amo Token:', token)
     return token, session
 
 
-def get_pipeline(image, s_name, text, time_string):
-    token, session = get_token()
+def get_pipeline(image, s_name, text, time_string, host, mail, password):
+    token, session = get_token(host, mail, password)
     pipelines = json.load(open('config.json'))['pipelines']
     for pipeline in pipelines:
         pip1 = pipeline
@@ -73,12 +69,12 @@ def get_pipeline(image, s_name, text, time_string):
                 return pipeline, pip1
     return None  # message[add][0][entity_id] || message[add][0][element_id]
 
+
 # Для leads[update][0][id] поставлен статус leads[update][0][status_id] в leads[update][0][pipeline_id]
 
 
-
-def send_notes(pipeline_id, text):
-    _, session = get_token()
+def send_notes(pipeline_id, text, host, mail, password):
+    _, session = get_token(host, mail, password)
     url = f'{host}private/notes/edit2.php?parent_element_id={pipeline_id}&parent_element_type=2'
     data = {
         'DATE_CREATE': int(time.time()),
@@ -90,11 +86,11 @@ def send_notes(pipeline_id, text):
     resp = session.post(url, data=data)
 
 
-def send_message(receiver_id: str, message: str, token=''):
+def send_message(receiver_id: str, message: str, account_chat_id, host, mail, password, token=''):
     while True:
         try:
             headers = {'X-Auth-Token': token}
-            url = f'https://amojo.amocrm.ru/v1/chats/{os.getenv("ACCOUNT_CHAT_ID")}/' \
+            url = f'https://amojo.amocrm.ru/v1/chats/{account_chat_id}/' \
                   f'{receiver_id}/messages?with_video=true&stand=v15'
             response = requests.post(url, headers=headers, data=json.dumps({"text": message}))
             print(response.status_code)
@@ -102,8 +98,6 @@ def send_message(receiver_id: str, message: str, token=''):
                 raise Exception("Токен не подошел!")
         except Exception as e:
             print(e, 2)
-            token, session = get_token()
+            token, session = get_token(host, mail, password)
             continue
         break
-
-

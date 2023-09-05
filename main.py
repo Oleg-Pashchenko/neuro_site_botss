@@ -7,6 +7,7 @@ from flask import Flask, request
 import misc
 import db
 import amo
+import psycopg2
 
 dotenv.load_dotenv()
 openai.api_key = os.getenv('OPENAI_API_KEY')
@@ -14,8 +15,25 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 app = Flask(__name__)
 
 
-@app.route('/', methods=["POST"])
-def main():
+def get_db_info(username):
+    conn = psycopg2.connect(
+        host=os.getenv('DB_HOST'),
+        database=os.getenv('DB_NAME'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD')
+    )
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM request_settings WHERE owner_name=%s;", (username,))
+    info = cur.fetchone()
+    conn.close()
+    api_key = info[0]
+    user, password, host, amo_key = info[3], info[4], info[2], info[5]
+    return api_key, user, password, host, amo_key
+
+
+@app.route('/<username>', methods=["POST"])
+def main(username):
+    api_key, user, password, host, amo_key = get_db_info(username)
     request_dict = request.form.to_dict()
     print(request_dict)
     if 'unsorted[add][0][pipeline_id]' in request_dict.keys():
@@ -79,7 +97,7 @@ def main():
     db.add_message(user_id, text, 'user')
 
     translation = misc.translate_to_russian(text)
-    amo.send_notes(pipeline, translation)
+    amo.send_notes(pipeline, translation, host, user, password)
     print('Q_T:', translation)
     messages += db.read_history(user_id)
     print('Message history length:', len(messages))
@@ -95,10 +113,10 @@ def main():
 
     response = response.replace('[ссылка]', '').replace('[link]', '')
     db.add_message(user_id, response, 'assistant')
-    amo.send_message(user_id_hash, response)
+    amo.send_message(user_id_hash, response, amo_key, host, user, password)
     print('A:', response)
     translation = misc.translate_to_russian(response)
-    amo.send_notes(pipeline, translation)
+    amo.send_notes(pipeline, translation, host, user, password)
     print('A_T:', translation)
     return 'ok'
 
