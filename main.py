@@ -97,7 +97,7 @@ def main(username):
     db.add_message(user_id, text, 'user')
 
     translation = misc.translate_to_russian(text)
-    amo.send_notes(pipeline, translation, host, user, password)
+    #amo.send_notes(pipeline, translation, host, user, password)
     print('Q_T:', translation)
     messages += db.read_history(user_id)
     print('Message history length:', len(messages))
@@ -116,7 +116,7 @@ def main(username):
     amo.send_message(user_id_hash, response, amo_key, host, user, password)
     print('A:', response)
     translation = misc.translate_to_russian(response)
-    amo.send_notes(pipeline, translation, host, user, password)
+    #amo.send_notes(pipeline, translation, host, user, password)
     print('A_T:', translation)
     return 'ok'
 
