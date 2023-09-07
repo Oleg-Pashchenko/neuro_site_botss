@@ -81,9 +81,9 @@ def wisper_detect(link: str):
 def get_chats_count_by_pipeline(pipeline_id, host, mail, password):
     url = f'https://chatgpt.amocrm.ru/ajax/leads/sum/{pipeline_id}/'
     token, session = get_token(host, mail, password)
-    response = requests.post(url, headers={'X-Auth-Token': token})
+    response = session.post(url, data={'leads_by_status': 'Y',
+                                       'skip_filter': 'Y'})
     print(response.text)
-
 
 
 def get_stats_info(pipeline_id):
