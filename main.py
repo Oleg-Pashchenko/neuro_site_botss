@@ -116,6 +116,7 @@ def main(username):
         temperature=params[5]
     )
     print(response)
+    print(response.keys())
     return 'ok'
     response = response['choices'][0]['message']['content']
     response = response.replace('[ссылка]', '').replace('[link]', '')
