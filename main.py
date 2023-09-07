@@ -75,8 +75,8 @@ def main(username):
     if int(request_dict['message[add][0][created_at]']) + 30 < int(time.time()): return 'ok'
     print('success')
     p_id = request_dict['message[add][0][entity_id]']
-    misc.get_chats_count_by_pipeline(pipeline_id=p_id, host=host, mail=user, password=password)
-    time.sleep(340)
+    #misc.get_chats_count_by_pipeline(pipeline_id=p_id, host=host, mail=user, password=password)
+    #time.sleep(340)
     misc.add_new_message_stats(p_id)
 
 
@@ -115,7 +115,7 @@ def main(username):
         max_tokens=params[4],
         temperature=params[5]
     )['choices'][0]['message']['content']
-
+    print(response)
     response = response.replace('[ссылка]', '').replace('[link]', '')
     db.add_message(user_id, response, 'assistant')
     amo.send_message(user_id_hash, response, amo_key, host, user, password)

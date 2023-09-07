@@ -95,7 +95,8 @@ def get_stats_info(pipeline_id):
         password=os.getenv('DB_PASSWORD')
     )
     cur = conn.cursor()
-    cur.execute("SELECT * FROM stats WHERE pipeline_id=%s", (pipeline_id,))
+    date = datetime.datetime.now().date()
+    cur.execute("SELECT * FROM stats WHERE pipeline_id=%s AND date=%s", (pipeline_id, date,))
     resp = cur.fetchone()
     conn.close()
     return resp
@@ -104,7 +105,6 @@ def get_stats_info(pipeline_id):
 def add_new_message_stats(pipeline_id):
     stats = get_stats_info(pipeline_id)
     date = datetime.datetime.now().date()
-
     conn = psycopg2.connect(
         host=os.getenv('DB_HOST'),
         database=os.getenv('DB_NAME'),
@@ -112,10 +112,14 @@ def add_new_message_stats(pipeline_id):
         password=os.getenv('DB_PASSWORD')
     )
     cur = conn.cursor()
-    cur.execute("SELECT * FROM stats WHERE pipeline_id=%s", (pipeline_id,))
-    resp = cur.fetchone()
+    if len(stats) == 0:
+        cur.execute("INSERT INTO stats (pipeline_id, messages_count, chats_count, openai_cost, date) VALUES"
+                    " (%s, %s, %s, %s, %s)", (pipeline_id, 1, 0, 0, date,))
+    else:
+        cur.execute("UPDATE stats SET messages_count=messages_count+1 WHERE pipeline_id=%s AND date=%s",
+                    (pipeline_id, date,))
+    conn.commit()
     conn.close()
-    return resp
 
 
 def add_new_cost_stats(pipeline_id, additional_cost):
@@ -125,8 +129,8 @@ def add_new_cost_stats(pipeline_id, additional_cost):
         user=os.getenv('DB_USER'),
         password=os.getenv('DB_PASSWORD')
     )
+    date = datetime.datetime.now().date()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM stats WHERE pipeline_id=%s", (pipeline_id,))
-    resp = cur.fetchone()
+    cur.execute("UPDATE stats SET openai_cost=openai_cost+%s WHERE pipeline_id=%s AND date=%s", (additional_cost, pipeline_id, date,))
+    conn.commit()
     conn.close()
-    return resp
