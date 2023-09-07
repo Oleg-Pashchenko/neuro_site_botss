@@ -76,10 +76,13 @@ def main(username):
     print('success')
     p_id = request_dict['message[add][0][entity_id]']
     #time.sleep(340)
+
     misc.add_new_message_stats(p_id)
     misc.get_chats_count_by_pipeline(pipeline_id=p_id, host=host, mail=user, password=password)
 
     bred = json.load(open('users_db.json', 'r', encoding='UTF-8'))
+    print(bred[
+        request_dict['message[add][0][entity_id]']])
     pipeline, pipeline_name = request_dict['message[add][0][entity_id]'], bred[
         request_dict['message[add][0][entity_id]']]
 
