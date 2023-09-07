@@ -112,7 +112,7 @@ def add_new_message_stats(pipeline_id):
         password=os.getenv('DB_PASSWORD')
     )
     cur = conn.cursor()
-    if len(stats) == 0:
+    if stats is None:
         cur.execute("INSERT INTO stats (pipeline_id, messages_count, chats_count, openai_cost, date) VALUES"
                     " (%s, %s, %s, %s, %s)", (pipeline_id, 1, 0, 0, date,))
     else:
