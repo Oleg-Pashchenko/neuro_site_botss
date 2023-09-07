@@ -115,9 +115,8 @@ def main(username):
         max_tokens=params[4],
         temperature=params[5]
     )
-    print(response)
-    print(response.keys())
-    return 'ok'
+    tokens_usage = response['usage']['total_tokens']
+    misc.add_new_cost_stats(pipeline_id=p_id, additional_cost=tokens_usage)
     response = response['choices'][0]['message']['content']
     response = response.replace('[ссылка]', '').replace('[link]', '')
     db.add_message(user_id, response, 'assistant')
