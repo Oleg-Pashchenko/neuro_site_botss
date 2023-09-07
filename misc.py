@@ -7,6 +7,8 @@ import psycopg2
 import os
 import dotenv
 
+from amo import get_token
+
 dotenv.load_dotenv()
 
 
@@ -73,3 +75,33 @@ def wisper_detect(link: str):
     options = whisper.DecodingOptions(fp16=False)
     result = whisper.decode(model, mel, options)
     return result.text
+
+
+def get_chats_count_by_pipeline(pipeline_id, host, mail, password):
+    url = f'https://chatgpt.amocrm.ru/ajax/leads/sum/{pipeline_id}/'
+    token, session = get_token(host, mail, password)
+    response = session.post(url)
+    print(response.text)
+
+
+
+def get_stats_info(pipeline_id):
+    conn = psycopg2.connect(
+        host=os.getenv('DB_HOST'),
+        database=os.getenv('DB_NAME'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD')
+    )
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM stats WHERE pipeline_id=%s", (pipeline_id,))
+    resp = cur.fetchone()
+    conn.close()
+    return resp
+
+
+def add_new_message_stats(pipeline_id):
+    pass
+
+
+def add_new_cost_stats(pipeline_id, additional_cost):
+    pass
