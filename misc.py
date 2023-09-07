@@ -1,3 +1,4 @@
+import datetime
 import json
 import os
 
@@ -101,8 +102,31 @@ def get_stats_info(pipeline_id):
 
 
 def add_new_message_stats(pipeline_id):
-    pass
+    stats = get_stats_info(pipeline_id)
+    date = datetime.datetime.now().date()
+
+    conn = psycopg2.connect(
+        host=os.getenv('DB_HOST'),
+        database=os.getenv('DB_NAME'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD')
+    )
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM stats WHERE pipeline_id=%s", (pipeline_id,))
+    resp = cur.fetchone()
+    conn.close()
+    return resp
 
 
 def add_new_cost_stats(pipeline_id, additional_cost):
-    pass
+    conn = psycopg2.connect(
+        host=os.getenv('DB_HOST'),
+        database=os.getenv('DB_NAME'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD')
+    )
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM stats WHERE pipeline_id=%s", (pipeline_id,))
+    resp = cur.fetchone()
+    conn.close()
+    return resp
