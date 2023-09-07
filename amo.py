@@ -45,11 +45,11 @@ def get_token(host, mail, password):
         time.sleep(3)
         return get_token(host, mail, password)
     print('Amo Token:', token)
-    return token, session
+    return token, session, headers
 
 
 def get_pipeline(image, s_name, text, time_string, host, mail, password):
-    token, session = get_token(host, mail, password)
+    token, session, _ = get_token(host, mail, password)
     pipelines = json.load(open('config.json'))['pipelines']
     for pipeline in pipelines:
         pip1 = pipeline
@@ -74,7 +74,7 @@ def get_pipeline(image, s_name, text, time_string, host, mail, password):
 
 
 def send_notes(pipeline_id, text, host, mail, password):
-    _, session = get_token(host, mail, password)
+    _, session, _ = get_token(host, mail, password)
     url = f'{host}private/notes/edit2.php?parent_element_id={pipeline_id}&parent_element_type=2'
     data = {
         'DATE_CREATE': int(time.time()),
@@ -98,6 +98,6 @@ def send_message(receiver_id: str, message: str, account_chat_id, host, mail, pa
                 raise Exception("Токен не подошел!")
         except Exception as e:
             print(e, 2)
-            token, session = get_token(host, mail, password)
+            token, session, _ = get_token(host, mail, password)
             continue
         break

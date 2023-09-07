@@ -81,10 +81,27 @@ def wisper_detect(link: str):
 
 def get_chats_count_by_pipeline(pipeline_id, host, mail, password):
     url = f'https://chatgpt.amocrm.ru/ajax/leads/sum/{pipeline_id}/'
-    token, session = get_token(host, mail, password)
-    response = session.post(url, data={'leads_by_status': 'Y',
-                                       'skip_filter': 'Y'})
-    print(response.text)
+    token, session, headers = get_token(host, mail, password)
+    resp = session.get(f'https://appgpt.amocrm.ru/leads/pipeline/{pipeline_id}/?skip_filter=Y')
+    items = resp.text.split('"leads_info_by_status":[')[1].split('{"ID":')[1::]
+    data = {'leads_by_status': 'Y', 'skip_filter': 'Y', f'filter[pipe][{pipeline_id}][]': []}
+    for i in items:
+        i = i.split(',')[0]
+        if i.isdigit():
+            data[f'filter[pipe][{pipeline_id}][]'].append(int(i.split(',')[0].strip()))
+    response = session.post(url, headers=headers, data=data).json()
+    conn = psycopg2.connect(
+        host=os.getenv('DB_HOST'),
+        database=os.getenv('DB_NAME'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD')
+    )
+    date = datetime.datetime.now().date()
+    cur = conn.cursor()
+    cur.execute("UPDATE stats SET chats_count=%s WHERE pipeline_id=%s AND date=%s",
+                (response['all_count'], pipeline_id, date,))
+    conn.commit()
+    conn.close()
 
 
 def get_stats_info(pipeline_id):
@@ -131,6 +148,7 @@ def add_new_cost_stats(pipeline_id, additional_cost):
     )
     date = datetime.datetime.now().date()
     cur = conn.cursor()
-    cur.execute("UPDATE stats SET openai_cost=openai_cost+%s WHERE pipeline_id=%s AND date=%s", (additional_cost, pipeline_id, date,))
+    cur.execute("UPDATE stats SET openai_cost=openai_cost+%s WHERE pipeline_id=%s AND date=%s",
+                (additional_cost, pipeline_id, date,))
     conn.commit()
     conn.close()
