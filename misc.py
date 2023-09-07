@@ -1,6 +1,7 @@
 import json
 import os
 
+import requests
 import whisper
 import openai
 import psycopg2
@@ -80,7 +81,7 @@ def wisper_detect(link: str):
 def get_chats_count_by_pipeline(pipeline_id, host, mail, password):
     url = f'https://chatgpt.amocrm.ru/ajax/leads/sum/{pipeline_id}/'
     token, session = get_token(host, mail, password)
-    response = session.post(url)
+    response = requests.post(url, headers={'X-Auth-Token': token})
     print(response.text)
 
 
