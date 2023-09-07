@@ -120,6 +120,7 @@ def main(username):
     response = response['choices'][0]['message']['content']
     response = response.replace('[ссылка]', '').replace('[link]', '')
     db.add_message(user_id, response, 'assistant')
+    print()
     amo.send_message(user_id_hash, response, amo_key, host, user, password)
     print('A:', response)
     translation = misc.translate_to_russian(response)
