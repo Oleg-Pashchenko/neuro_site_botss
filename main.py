@@ -114,8 +114,9 @@ def main(username):
         messages=messages,
         max_tokens=params[4],
         temperature=params[5]
-    )['choices'][0]['message']['content']
+    )
     print(response)
+    response = response['choices'][0]['message']['content']
     response = response.replace('[ссылка]', '').replace('[link]', '')
     db.add_message(user_id, response, 'assistant')
     amo.send_message(user_id_hash, response, amo_key, host, user, password)
