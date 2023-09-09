@@ -92,7 +92,9 @@ def main(username):
     user_id = request_dict['message[add][0][entity_id]']
     user_id_hash = request_dict['message[add][0][chat_id]']
     chat_history = get_chat_history(user_id_hash, host, user, password, amo_key)
-    print(chat_history[0]['text'])
+    db_history = db.read_history(user_id)
+    print(db_history[-1])
+    print(chat_history[1]['text'])
     if int(request_dict['message[add][0][created_at]']) + 30 < int(time.time()): return 'ok'
     print('success')
 
