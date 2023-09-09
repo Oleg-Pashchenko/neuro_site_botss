@@ -3,6 +3,7 @@ import time
 import openai
 import os
 import dotenv
+import requests
 from flask import Flask, request
 import misc
 import db
@@ -13,6 +14,23 @@ dotenv.load_dotenv()
 openai.api_key = os.getenv('OPENAI_API_KEY')
 
 app = Flask(__name__)
+
+
+def get_chat_history(receiver_id, host, mail, password, chat_id):
+    while True:
+        try:
+            headers = {'X-Auth-Token': token}
+            url = f'https://amojo.amocrm.ru/messages/{chat_id}/merge?stand=v15' \
+                  f'&offset=0&limit=100&chat_id%5B%5D={receiver_id}&get_tags=true&lang=ru'
+            chat_history = requests.get(url, headers=headers).json()['message_list']
+
+        except Exception as e:
+            print(e, 1)
+            token, session, headers = amo.get_token(host, mail, password)
+            continue
+        break
+    return chat_history
+
 
 
 def get_db_info(username):
@@ -70,8 +88,11 @@ def main(username):
         print('Обычное сообщение')
     text = request_dict['message[add][0][text]']
     print('Q:', text)
+
     user_id = request_dict['message[add][0][entity_id]']
     user_id_hash = request_dict['message[add][0][chat_id]']
+    chat_history = get_chat_history(user_id_hash, host, user, password, amo_key)
+    print(chat_history)
     if int(request_dict['message[add][0][created_at]']) + 30 < int(time.time()): return 'ok'
     print('success')
 
