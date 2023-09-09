@@ -32,6 +32,10 @@ def get_chat_history(receiver_id, host, mail, password, chat_id):
     return chat_history
 
 
+def sync_db(chat_h, stop_phrase, user_id):
+    for i in chat_h[1::]:
+        if i['text'] != stop_phrase:
+            db.add_message(user_id, i['text'], 'assistant')
 
 def get_db_info(username):
     conn = psycopg2.connect(
@@ -93,8 +97,9 @@ def main(username):
     user_id_hash = request_dict['message[add][0][chat_id]']
     chat_history = get_chat_history(user_id_hash, host, user, password, amo_key)
     db_history = db.read_history(user_id)
-    print(db_history[-1])
-    print(chat_history[1]['text'])
+    if db_history[-1]['content'] != chat_history[1]['text']:
+        sync_db(chat_history, db_history[-1]['content'], user_id)
+
     if int(request_dict['message[add][0][created_at]']) + 30 < int(time.time()): return 'ok'
     print('success')
 
