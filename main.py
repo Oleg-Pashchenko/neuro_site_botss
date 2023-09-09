@@ -36,6 +36,8 @@ def sync_db(chat_h, stop_phrase, user_id):
     for i in chat_h[1::]:
         if i['text'] != stop_phrase:
             db.add_message(user_id, i['text'], 'assistant')
+        else:
+            break
 
 def get_db_info(username):
     conn = psycopg2.connect(
