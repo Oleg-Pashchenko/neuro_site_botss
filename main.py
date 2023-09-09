@@ -32,6 +32,10 @@ def get_chat_history(receiver_id, host, mail, password, chat_id):
     return chat_history
 
 
+def add_salebot_context(chat_history, user_id):
+    db.add_message(user_id, chat_history[1], 'assistant')
+    db.add_message(user_id, chat_history[0], 'user')
+
 def sync_db(chat_h, stop_phrase, user_id):
     for i in chat_h[1::]:
         if i['text'] != stop_phrase:
@@ -99,6 +103,10 @@ def main(username):
     user_id_hash = request_dict['message[add][0][chat_id]']
     chat_history = get_chat_history(user_id_hash, host, user, password, amo_key)
     db_history = db.read_history(user_id)
+
+    if len(db_history) == 0 and len(chat_history) == 2:
+        add_salebot_context(chat_history, user_id)
+
     if db_history[-1]['content'] != chat_history[1]['text']:
         sync_db(chat_history, db_history[-1]['content'], user_id)
 
