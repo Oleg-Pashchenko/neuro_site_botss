@@ -6,6 +6,7 @@ app = Flask(__name__)
 @app.route('/')
 def main():
     print(request.form.to_dict())
+    return 'ok'
 
 
 if __name__ == '__main__':
