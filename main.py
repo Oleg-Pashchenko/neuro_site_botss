@@ -101,9 +101,11 @@ def main(username):
 
     user_id = request_dict['message[add][0][entity_id]']
     user_id_hash = request_dict['message[add][0][chat_id]']
-    chat_history = get_chat_history(user_id_hash, host, user, password, amo_key)
-    db_history = db.read_history(user_id)
-
+    #chat_history = get_chat_history(user_id_hash, host, user, password, amo_key)
+    #try:
+    #    db_history = db.read_history(user_id)
+    #except:
+    #    db_history = []
     #if len(db_history) == 0 and len(chat_history) == 2:
     #    add_salebot_context(chat_history, user_id)
 
