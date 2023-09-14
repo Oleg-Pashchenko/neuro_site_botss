@@ -123,11 +123,17 @@ def main(username):
     pipeline, pipeline_name = request_dict['message[add][0][entity_id]'], bred[
         request_dict['message[add][0][entity_id]']]
     p_id = pipeline_name
-    misc.add_new_message_stats(p_id)
-    misc.get_chats_count_by_pipeline(pipeline_id=p_id, host=host, mail=user, password=password)
-
+    try:
+        misc.add_new_message_stats(p_id)
+    except:
+        print('Unable to add_new_message_stats')
+    try:
+        misc.get_chats_count_by_pipeline(pipeline_id=p_id, host=host, mail=user, password=password)
+    except:
+        print('Unable to get_chats_count_by_pipeline')
     print('Pipeline:', pipeline, 'ChatId:', user_id, 'Pipeline_name', pipeline_name)
     if pipeline is None: return 'ok'
+
     params = misc.get_params(pipeline_name)
 
     if 'message[add][0][attachment][link]' in request_dict.keys():
@@ -158,7 +164,10 @@ def main(username):
         temperature=params[5]
     )
     tokens_usage = response['usage']['total_tokens']
-    misc.add_new_cost_stats(pipeline_id=p_id, additional_cost=tokens_usage)
+    try:
+        misc.add_new_cost_stats(pipeline_id=p_id, additional_cost=tokens_usage)
+    except:
+        print('Unable to add_new_cost_stats')
     response = response['choices'][0]['message']['content']
     response = response.replace('[ссылка]', '').replace('[link]', '')
     db.add_message(user_id, response, 'assistant')
