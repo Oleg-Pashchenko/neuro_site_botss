@@ -104,11 +104,11 @@ def main(username):
     chat_history = get_chat_history(user_id_hash, host, user, password, amo_key)
     db_history = db.read_history(user_id)
 
-    if len(db_history) == 0 and len(chat_history) == 2:
-        add_salebot_context(chat_history, user_id)
+    #if len(db_history) == 0 and len(chat_history) == 2:
+    #    add_salebot_context(chat_history, user_id)
 
-    if db_history[-1]['content'] != chat_history[1]['text']:
-        sync_db(chat_history, db_history[-1]['content'], user_id)
+    #if db_history[-1]['content'] != chat_history[1]['text']:
+    #    sync_db(chat_history, db_history[-1]['content'], user_id)
 
     if int(request_dict['message[add][0][created_at]']) + 30 < int(time.time()): return 'ok'
     print('success')
