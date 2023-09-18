@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:postgresql://94.198.218.2:5432/neurosite</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="avatarex@94.198.218.2" uuid="8e33607d-e512-476f-8dd8-e93760b42bb1">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://94.198.218.2:5432/avatarex</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
