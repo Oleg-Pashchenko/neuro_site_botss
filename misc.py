@@ -22,7 +22,7 @@ def get_annotation(pipeline) -> str:
         password=os.getenv('DB_PASSWORD')
     )
     cur = conn.cursor()
-    cur.execute("SELECT text FROM pipelines WHERE pipeline_id=%s", (pipeline,))
+    cur.execute("SELECT text FROM users_application_amocrm_pipelines WHERE id=%s", (pipeline,))
     resp = cur.fetchone()
     conn.close()
     return resp[0]
@@ -36,7 +36,7 @@ def get_params(pipeline):
         password=os.getenv('DB_PASSWORD')
     )
     cur = conn.cursor()
-    cur.execute("SELECT * FROM pipelines WHERE pipeline_id=%s", (pipeline,))
+    cur.execute("SELECT * FROM users_application_amocrm_pipelines WHERE id=%s", (pipeline,))
     resp = cur.fetchone()
     conn.close()
     return resp

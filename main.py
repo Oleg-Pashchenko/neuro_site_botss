@@ -51,11 +51,11 @@ def get_db_info(username):
         password=os.getenv('DB_PASSWORD')
     )
     cur = conn.cursor()
-    cur.execute("SELECT * FROM request_settings WHERE owner_name=%s;", (username,))
+    cur.execute("SELECT * FROM users_application_amocrm_settings WHERE user_id_id=%s;", (username,))
     info = cur.fetchone()
     conn.close()
     api_key = info[0]
-    user, password, host, amo_key = info[3], info[4], info[2], info[5]
+    user, password, host, amo_key = info[2], info[3], info[1], info[4]
     return api_key, user, password, host, amo_key
 
 
@@ -138,7 +138,7 @@ def main(username):
 
     if 'message[add][0][attachment][link]' in request_dict.keys():
         print('Voice message detected!')
-        if params[6] == 1:
+        if int(params[6]) == 1:
             text = misc.wisper_detect(request_dict['message[add][0][attachment][link]'])
         else:
             return 'ok'
