@@ -51,7 +51,7 @@ def get_db_info(username):
         password=os.getenv('DB_PASSWORD')
     )
     cur = conn.cursor()
-    cur.execute("SELECT * FROM public.users_application_amocrm_settings WHERE user_id_id=%s;", (username,))
+    cur.execute("SELECT * FROM users_application_amocrm_settings WHERE user_id_id=%s;", (username,))
     info = cur.fetchone()
     conn.close()
     api_key = info[0]
