@@ -62,6 +62,7 @@ def get_db_info(username):
 @app.route('/<username>', methods=["POST"])
 def main(username):
     api_key, user, password, host, amo_key = get_db_info(username)
+
     request_dict = request.form.to_dict()
     print(request_dict)
     if 'unsorted[add][0][pipeline_id]' in request_dict.keys():
@@ -123,19 +124,19 @@ def main(username):
     pipeline, pipeline_name = request_dict['message[add][0][entity_id]'], bred[
         request_dict['message[add][0][entity_id]']]
     p_id = pipeline_name
-    try:
-        misc.add_new_message_stats(p_id)
-    except:
-        print('Unable to add_new_message_stats')
-    try:
-        misc.get_chats_count_by_pipeline(pipeline_id=p_id, host=host, mail=user, password=password)
-    except:
-        print('Unable to get_chats_count_by_pipeline')
+    #try:
+    #    misc.add_new_message_stats(p_id)
+    #except:
+    #    print('Unable to add_new_message_stats')
+    #try:
+    #    misc.get_chats_count_by_pipeline(pipeline_id=p_id, host=host, mail=user, password=password)
+    #except:
+    #    print('Unable to get_chats_count_by_pipeline')
     print('Pipeline:', pipeline, 'ChatId:', user_id, 'Pipeline_name', pipeline_name)
     if pipeline is None: return 'ok'
 
     params = misc.get_params(pipeline_name)
-
+    print(params)
     if 'message[add][0][attachment][link]' in request_dict.keys():
         print('Voice message detected!')
         if int(params[6]) == 1:
@@ -164,10 +165,10 @@ def main(username):
         temperature=params[5]
     )
     tokens_usage = response['usage']['total_tokens']
-    try:
-        misc.add_new_cost_stats(pipeline_id=p_id, additional_cost=tokens_usage)
-    except:
-        print('Unable to add_new_cost_stats')
+    #try:
+    #    misc.add_new_cost_stats(pipeline_id=p_id, additional_cost=tokens_usage)
+    #except:
+    #    print('Unable to add_new_cost_stats')
     response = response['choices'][0]['message']['content']
     response = response.replace('[ссылка]', '').replace('[link]', '')
     db.add_message(user_id, response, 'assistant')
