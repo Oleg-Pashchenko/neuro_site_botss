@@ -5,11 +5,9 @@ import json
 # Словарь для хранения данных пользователя
 user_data = {}
 
-
 class PostDataHandler(tornado.web.RequestHandler):
-    async def post(self):
+    async def post(self, username):
         try:
-            username = self.get_argument("username")
             data = json.loads(self.request.body.decode('utf-8'))
             user_data[username] = data
             self.write({"message": f"Data for {username} has been received and stored."})
@@ -17,12 +15,10 @@ class PostDataHandler(tornado.web.RequestHandler):
             self.set_status(400)
             self.write({"error": "Invalid data format."})
 
-
 def make_app():
     return tornado.web.Application([
-        (r"/", PostDataHandler),
+        (r"/(\d+)", PostDataHandler),
     ])
-
 
 if __name__ == "__main__":
     app = make_app()
