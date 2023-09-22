@@ -1,11 +1,13 @@
-from fastapi import FastAPI, Request
+from typing import Any
+
+from fastapi import FastAPI, Request, Body
 
 app = FastAPI()
 
 
 @app.post("/{username}")
-async def main(request: Request):
-    print(await request.json())
+async def main(payload: Any = Body(None)):
+    print(payload)
     return {"message": "Hello, World!"}
 
 
