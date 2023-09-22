@@ -9,7 +9,7 @@ class PostDataHandler(tornado.web.RequestHandler):
     async def post(self, username):
         print(username, self.request.body)
         try:
-            data = json.loads(self.request.body.decode('utf-8'))
+            data = json.loads(self.request.body)
             user_data[username] = data
             self.write({"message": f"Data for {username} has been received and stored."})
         except Exception as e:
