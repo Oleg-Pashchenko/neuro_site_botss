@@ -1,15 +1,31 @@
-from fastapi import FastAPI, Body
+import tornado.ioloop
+import tornado.web
+import json
 
-app = FastAPI()
+# Словарь для хранения данных пользователя
+user_data = {}
 
 
-@app.post("/{username}")
-async def main(username: str):
-    print(username)
-    return {"message": "Hello, World!"}
+class PostDataHandler(tornado.web.RequestHandler):
+    async def post(self):
+        try:
+            username = self.get_argument("username")
+            data = json.loads(self.request.body.decode('utf-8'))
+            user_data[username] = data
+            self.write({"message": f"Data for {username} has been received and stored."})
+        except Exception as e:
+            self.set_status(400)
+            self.write({"error": "Invalid data format."})
+
+
+def make_app():
+    return tornado.web.Application([
+        (r"/post_data/", PostDataHandler),
+    ])
 
 
 if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    app = make_app()
+    app.listen(8000, address="0.0.0.0")
+    print("Server is running on http://0.0.0.0:8000")
+    tornado.ioloop.IOLoop.current().start()
