@@ -4,8 +4,8 @@ app = FastAPI()
 
 
 @app.post("/{username}")
-async def main(username: str, message: dict = Body(...)):
-    print(username, message)
+async def main(username: str):
+    print(username)
     return {"message": "Hello, World!"}
 
 
