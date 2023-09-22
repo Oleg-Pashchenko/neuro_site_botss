@@ -1,11 +1,17 @@
-from fastapi import FastAPI, Request
+from typing import Dict, List, AnyStr, Any, Union
+
+from fastapi import FastAPI
 
 app = FastAPI()
 
+JSONObject = Dict[AnyStr, Any]
+JSONArray = List[Any]
+JSONStructure = Union[JSONArray, JSONObject]
+
 
 @app.post("/{username}")
-async def main(username: str, request: Request):
-    print(username, await request.json())
+async def main(username: str, request: JSONStructure):
+    print(username, request)
     return {"message": "Hello, World!"}
 
 
