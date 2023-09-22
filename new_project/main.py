@@ -10,7 +10,7 @@ JSONStructure = Union[JSONArray, JSONObject]
 
 
 @app.post("/{username}")
-async def main(username: str, request: JSONStructure):
+async def main(username: str, request: JSONStructure = None):
     print(username, request)
     return {"message": "Hello, World!"}
 
