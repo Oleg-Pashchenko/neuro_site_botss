@@ -1,6 +1,7 @@
 import tornado.ioloop
 import tornado.web
 import json
+from urllib.parse import unquote
 
 # Словарь для хранения данных пользователя
 user_data = {}
@@ -8,8 +9,9 @@ user_data = {}
 class PostDataHandler(tornado.web.RequestHandler):
     async def post(self, username):
         print(username, self.request.body)
+        decoded_data = unquote(self.request.body.decode('utf-8'))
         try:
-            data = json.loads(self.request.body)
+            data = json.loads(decoded_data)
             user_data[username] = data
             self.write({"message": f"Data for {username} has been received and stored."})
         except Exception as e:
