@@ -62,9 +62,15 @@ def get_db_info(username):
 @app.route('/<username>', methods=["POST"])
 def main(username):
     api_key, user, password, host, amo_key = get_db_info(username)
-
     request_dict = request.form.to_dict()
-    print(request_dict)
+
+    
+
+
+
+
+
+
     if 'unsorted[add][0][pipeline_id]' in request_dict.keys():
         db1 = json.load(open('users_db.json', 'r', encoding='UTF-8'))
         db1[request_dict['unsorted[add][0][lead_id]']] = request_dict['unsorted[add][0][pipeline_id]']
