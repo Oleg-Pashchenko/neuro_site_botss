@@ -20,7 +20,7 @@ class PostDataHandler(tornado.web.RequestHandler):
 
 def make_app():
     return tornado.web.Application([
-        (r"/post_data/", PostDataHandler),
+        (r"/", PostDataHandler),
     ])
 
 
