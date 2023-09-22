@@ -8,8 +8,9 @@ user_data = {}
 
 class PostDataHandler(tornado.web.RequestHandler):
     async def post(self, username):
-        print(username, self.request.body)
+        print(username)
         decoded_data = unquote(self.request.body.decode('utf-8'))
+        print(decoded_data)
         try:
             data = json.loads(decoded_data)
             user_data[username] = data
