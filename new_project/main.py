@@ -62,6 +62,7 @@ class PostDataHandler(tornado.web.RequestHandler):
                 messages.append({'role': 'user', 'content': message_obj.message})
         messages = messages[::-1]
         messages.append({"role": "system", "content": request_settings.text})
+        print(messages)
         return messages
 
     async def _get_openai_response(self, request_settings: RequestSettings, lead_id):
