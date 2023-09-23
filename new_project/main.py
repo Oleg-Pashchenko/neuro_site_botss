@@ -57,7 +57,7 @@ class PostDataHandler(tornado.web.RequestHandler):
                 messages.append({'role': 'assistant', 'content': message_obj.message})
             else:
                 messages.append({'role': 'user', 'content': message_obj.message})
-        messages.sort(reverse=True)
+        messages = messages[::-1]
         messages.append({"role": "system", "content": request_settings.text})
         return messages
 
