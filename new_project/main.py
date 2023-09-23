@@ -54,7 +54,6 @@ class PostDataHandler(tornado.web.RequestHandler):
         symbols = 16385 if '16k' in request_settings.model else 4097
         symbols = (symbols - request_settings.tokens) * 0.75 - len(request_settings.text)
         for message_obj in message_objects:
-            print(symbols)
             if symbols - len(message_obj.message) <= 0:
                 break
             if message_obj.is_bot:
@@ -68,7 +67,6 @@ class PostDataHandler(tornado.web.RequestHandler):
 
     async def _get_openai_response(self, request_settings: RequestSettings, lead_id):
         model = request_settings.ft_model if request_settings.ft_model != '' else request_settings.model
-        print(request_settings.openai_api_key)
         openai.api_key = request_settings.openai_api_key
         response = await openai.ChatCompletion.acreate(
             model=model,
@@ -108,6 +106,7 @@ class PostDataHandler(tornado.web.RequestHandler):
         response_text = await self._get_openai_response(request_settings, lead_id)
 
         if await self._message_is_not_last(lead_id, message):
+            print('Message is not last')
             return 'ok'
 
         new_message_obj = Messages(id=f'assistant-{random.randint(1000000, 10000000)}', message=response_text,
