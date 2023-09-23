@@ -65,7 +65,7 @@ class PostDataHandler(tornado.web.RequestHandler):
         model = request_settings.ft_model if request_settings.ft_model != '' else request_settings.model
         response = openai.ChatCompletion.create(
             model=model,
-            messages=self._get_messages(lead_id, request_settings),
+            messages=await self._get_messages(lead_id, request_settings),
             max_tokens=request_settings.tokens,
             temperature=request_settings.temperature
         )
@@ -93,7 +93,7 @@ class PostDataHandler(tornado.web.RequestHandler):
             await self.clear_history(lead.pipeline_id)
             return 'ok'
 
-        response_text = self._get_openai_response(request_settings, lead_id)
+        response_text = await self._get_openai_response(request_settings, lead_id)
         print(response_text)
 
 
