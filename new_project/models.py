@@ -22,7 +22,7 @@ class Leads(Base):
 
 class Messages(Base):
     __tablename__ = 'messages'
-    id = Column(Integer, primary_key=True)
+    id = Column(String(300))
     message = Column(String(10000))
     lead_id = Column(Integer, ForeignKey('leads.id'))
 
