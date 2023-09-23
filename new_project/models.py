@@ -43,8 +43,8 @@ class RequestSettings:
     openai_api_key = ''
 
     def __init__(self, pipeline_id, user_id):
-        self._get_data_from_amocrm_db_settings(pipeline_id)
-        self._get_data_from_amocrm_db_pipelines(user_id)
+        self._get_data_from_amocrm_db_settings(user_id)
+        self._get_data_from_amocrm_db_pipelines(pipeline_id)
 
     def _get_data_from_amocrm_db_pipelines(self, pipeline_id):
         conn = psycopg2.connect(
@@ -73,7 +73,6 @@ class RequestSettings:
             password=os.getenv('DB_PASSWORD')
         )
         cur = conn.cursor()
-        print(user_id)
         cur.execute("SELECT * FROM users_application_amocrm_settings WHERE user_id_id=%s;", (user_id,))
         info = cur.fetchone()
         conn.close()
