@@ -92,6 +92,7 @@ class PostDataHandler(tornado.web.RequestHandler):
 
         message, lead_id = r_d['message[add][0][text]'], r_d['message[add][0][element_id]']
         user_id_hash = r_d['message[add][0][chat_id]']
+        print(message)
 
         new_message_obj = Messages(id=message_id, message=message, lead_id=lead_id, is_bot=False)
         session.add(new_message_obj)
@@ -105,6 +106,7 @@ class PostDataHandler(tornado.web.RequestHandler):
             return 'ok'
 
         response_text = await self._get_openai_response(request_settings, lead_id)
+        print(response_text)
         if await self._message_is_not_last(lead_id, message):
             return 'ok'
 
