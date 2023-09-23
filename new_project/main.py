@@ -41,18 +41,35 @@ class PostDataHandler(tornado.web.RequestHandler):
         session.query(Messages).filter(Messages.lead_id == result.id).delete()
         session.commit()
 
-    async def message_already_exists(self, r_d):
-        result = session.query(Messages).filter_by(id=r_d['message[add][0][id]']).first()
+    async def message_already_exists(self, message_id):
+        result = session.query(Messages).filter_by(id=message_id).first()
         return True if result else False
 
-    async def _get_openai_response(self, message, request_settings):
-        response = openai.ChatCompletion.create(
-            model=model_to_use,
-            messages=messages,
-            max_tokens=max_tokens,
-            temperature=temperature
-        )
+    async def _get_messages(self, lead_id, request_settings: RequestSettings):
+        message_objects = session.query(Messages).filter_by(lead_id=lead_id).all()[::-1]
+        messages = []
+        symbols = 16385 if '16k' in request_settings.model else 4097
+        symbols = symbols * 3 - len(request_settings.text) - request_settings.tokens
+        for message_obj in message_objects:
+            if symbols - len(message_obj.message) <= 0:
+                break
+            if message_obj.is_bot:
+                messages.append({'role': 'assistant', 'content': message_obj.message})
+            else:
+                messages.append({'role': 'user', 'content': message_obj.message})
+        messages.sort(reverse=True)
+        messages.append({"role": "system", "content": request_settings.text})
+        return messages
 
+    async def _get_openai_response(self, request_settings: RequestSettings, lead_id):
+        model = request_settings.ft_model if request_settings.ft_model != '' else request_settings.model
+        response = openai.ChatCompletion.create(
+            model=model,
+            messages=self._get_messages(lead_id, request_settings),
+            max_tokens=request_settings.tokens,
+            temperature=request_settings.temperature
+        )
+        return response['choices'][0]['message']['content']
 
     async def post(self, username):
         r_d = await self._get_request_dict()
@@ -60,18 +77,24 @@ class PostDataHandler(tornado.web.RequestHandler):
             await self._update_pipeline_information(r_d)
             return 'ok'
 
-        if await self.message_already_exists(r_d):
+        message_id = r_d['message[add][0][id]']
+        if await self.message_already_exists(message_id):
             return 'ok'
 
         message, lead_id = r_d['message[add][0][text]'], r_d['message[add][0][element_id]']
+
+        new_message_obj = Messages(id=message_id, message=message, lead_id=lead_id, is_bot=False)
+        session.add(new_message_obj)
+
         lead = session.query(Leads).filter_by(id=lead_id).first()
         request_settings = RequestSettings(lead.pipeline_id, username)
 
         if message == '/restart':
             await self.clear_history(lead.pipeline_id)
             return 'ok'
-        print(vars(request_settings))
-        # response_text = self._get_openai_response(message, request_settings)
+
+        response_text = self._get_openai_response(request_settings, lead_id)
+        print(response_text)
 
 
 def make_app():
@@ -85,5 +108,3 @@ if __name__ == "__main__":
     app.listen(8000, address="0.0.0.0")
     print("Server is running on http://0.0.0.0:8000")
     tornado.ioloop.IOLoop.current().start()
-
-"""{'account[subdomain]': 'appgpt', 'account[id]': '31257294', 'account[_links][self]': 'https://appgpt.amocrm.ru', 'message[add][0][id]': 'd3bac6d3-1b5e-40c2-a054-4e0cfe283edb', 'message[add][0][chat_id]': '54caee02-e383-46d8-a9b7-1fb43f07cffe', 'message[add][0][talk_id]': '100', 'message[add][0][contact_id]': '93589657', 'message[add][0][text]': 'f', 'message[add][0][created_at]': '1695486610', 'message[add][0][element_type]': '2', 'message[add][0][entity_type]': 'lead', 'message[add][0][element_id]': '28455849', 'message[add][0][entity_id]': '28455849', 'message[add][0][type]': 'incoming', 'message[add][0][author][id]': '1db2f5cc-aea4-4f96-8d4f-a256ead5b7b0', 'message[add][0][author][type]': 'external', 'message[add][0][author][name]': 'Oleg', 'message[add][0][author][avatar_url]': 'https://amojo.amocrm.ru/attachments/profiles/1db2f5cc-aea4-4f96-8d4f-a256ead5b7b0/RKCPe-file-1_128x128.jpg', 'message[add][0][origin]': 'telegram'}"""

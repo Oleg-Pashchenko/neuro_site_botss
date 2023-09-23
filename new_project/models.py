@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.ext.declarative import declarative_base
 import os
@@ -26,7 +26,7 @@ class Messages(Base):
     id = Column(String(300))
     message = Column(String(10000))
     lead_id = Column(Integer, ForeignKey('leads.id'))
-
+    is_bot = Column(Boolean)
 
 class RequestSettings:
     id = ''
@@ -62,9 +62,9 @@ class RequestSettings:
         self.text = resp[1]
         self.model = resp[2]
         self.ft_model = resp[3]
-        self.tokens = resp[4]
-        self.temperature = resp[5]
-        self.voice = resp[6]
+        self.tokens = int(resp[4])
+        self.temperature = float(resp[5])
+        self.voice = bool(resp[6])
 
     def _get_data_from_amocrm_db_settings(self, user_id):
         conn = psycopg2.connect(
@@ -81,6 +81,6 @@ class RequestSettings:
         self.user, self.password, self.host, self.amo_key = info[2], info[3], info[1], info[4]
 
 
-#Base.metadata.create_all(engine)
+# Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
