@@ -63,10 +63,12 @@ class PostDataHandler(tornado.web.RequestHandler):
         if await self.message_already_exists(r_d):
             return 'ok'
 
-        message, pipeline_id = r_d['message[add][0][text]'], r_d['message[add][0][element_id]']
-        request_settings = RequestSettings(pipeline_id, username)
+        message, lead_id = r_d['message[add][0][text]'], r_d['message[add][0][element_id]']
+        lead = session.query(Leads).filter_by(id=lead_id).first()
+        request_settings = RequestSettings(lead.pipeline_id, username)
+
         if message == '/restart':
-            await self.clear_history(pipeline_id)
+            await self.clear_history(lead.pipeline_id)
             return 'ok'
         print(request_settings)
         # response_text = self._get_openai_response(message, request_settings)
