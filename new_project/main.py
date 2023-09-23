@@ -16,16 +16,7 @@ class PostDataHandler(tornado.web.RequestHandler):
             params = el.split('=')
             k, v = params[0], params[1]
             request_dict[k] = v
-
-        try:
-            data = json.loads(decoded_data)
-            user_data[username] = data
-            self.write({"message": f"Data for {username} has been received and stored."})
-        except Exception as e:
-            print(e)
-            self.set_status(400)
-            self.write({"error": "Invalid data format."})
-
+        print(request_dict)
 
 def make_app():
     return tornado.web.Application([
