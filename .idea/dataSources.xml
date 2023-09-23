@@ -15,5 +15,12 @@
       <jdbc-url>jdbc:postgresql://94.198.218.2:5432/avatarex</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="avatarex_bot@94.198.218.2" uuid="89480c18-eef1-4b92-b5f4-283e3664d3b2">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://94.198.218.2:5432/avatarex_bot</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

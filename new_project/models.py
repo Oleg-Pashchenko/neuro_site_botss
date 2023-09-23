@@ -12,22 +12,21 @@ engine = create_engine(f'postgresql://{os.getenv("DB_USER")}:{os.getenv("DB_PASS
 Base = declarative_base()
 
 
-class User(Base):
-    __tablename__ = 'users'
+class Leads(Base):
+    __tablename__ = 'leads'
     id = Column(Integer, primary_key=True)
-    username = Column(String(50), unique=True)
-    email = Column(String(100))
+    pipeline_id = Column(Integer)
+    status_id = Column(Integer)
 
 
-class Post(Base):
-    __tablename__ = 'posts'
+class Messages(Base):
+    __tablename__ = 'messages'
     id = Column(Integer, primary_key=True)
-    title = Column(String(100))
-    content = Column(String(500))
-    user_id = Column(Integer, ForeignKey('users.id'))
-    user = relationship('User', back_populates='posts')
+    message = Column(String(10000))
+    lead_id = Column(Integer, ForeignKey('leads.id'))
 
 
-# Base.metadata.create_all(engine)
+
+#Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
