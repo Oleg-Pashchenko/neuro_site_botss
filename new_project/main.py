@@ -70,7 +70,7 @@ class PostDataHandler(tornado.web.RequestHandler):
         if message == '/restart':
             await self.clear_history(lead.pipeline_id)
             return 'ok'
-        print(request_settings)
+        print(vars(request_settings))
         # response_text = self._get_openai_response(message, request_settings)
 
 
