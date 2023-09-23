@@ -97,7 +97,7 @@ class PostDataHandler(tornado.web.RequestHandler):
 
         lead = session.query(Leads).filter_by(id=lead_id).first()
         request_settings = RequestSettings(lead.pipeline_id, username)
-
+        print(lead.status_id, request_settings.block_statuses)
         if int(lead.status_id) in request_settings.block_statuses:
             return 'ok'
 
