@@ -28,6 +28,7 @@ class Messages(Base):
     lead_id = Column(Integer, ForeignKey('leads.id'))
     is_bot = Column(Boolean)
 
+
 class RequestSettings:
     id = ''
     text = ''
@@ -41,10 +42,29 @@ class RequestSettings:
     password = ''
     amo_key = ''
     openai_api_key = ''
+    block_statuses = []
 
     def __init__(self, pipeline_id, user_id):
         self._get_data_from_amocrm_db_settings(user_id)
         self._get_data_from_amocrm_db_pipelines(pipeline_id)
+        self._get_data_from_amocrm_db_statuses(pipeline_id)
+
+    def _get_data_from_amocrm_db_statuses(self, pipeline_id):
+        conn = psycopg2.connect(
+            host=os.getenv('DB_HOST'),
+            database='avatarex',
+            user=os.getenv('DB_USER'),
+            password=os.getenv('DB_PASSWORD')
+        )
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM users_application_statuses WHERE pipeline_id_id=%s", (pipeline_id,))
+        resp = cur.fetchall()
+        conn.close()
+        statuses = []
+        for r in resp:
+            if r[4] is False:
+                statuses.append(int(r[4]))
+        self.block_statuses = statuses
 
     def _get_data_from_amocrm_db_pipelines(self, pipeline_id):
         conn = psycopg2.connect(
