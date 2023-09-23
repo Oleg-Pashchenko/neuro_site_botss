@@ -1,5 +1,6 @@
 import asyncio
 import random
+import time
 
 import openai
 import tornado.ioloop
@@ -86,7 +87,7 @@ class PostDataHandler(tornado.web.RequestHandler):
             return 'ok'
 
         message_id = r_d['message[add][0][id]']
-        if await self.message_already_exists(message_id):
+        if await self.message_already_exists(message_id) or int(r_d['message[add][0][created_at]']) + 30 < int(time.time()):
             return 'ok'
 
         message, lead_id = r_d['message[add][0][text]'].replace('+', ' '), r_d['message[add][0][element_id]']
@@ -98,7 +99,6 @@ class PostDataHandler(tornado.web.RequestHandler):
 
         lead = session.query(Leads).filter_by(id=lead_id).first()
         request_settings = RequestSettings(lead.pipeline_id, username)
-
         if message == '/restart':
             await self.clear_history(lead.pipeline_id)
             return 'ok'
@@ -106,7 +106,6 @@ class PostDataHandler(tornado.web.RequestHandler):
         response_text = await self._get_openai_response(request_settings, lead_id)
 
         if await self._message_is_not_last(lead_id, message):
-            print('Message is not last')
             return 'ok'
 
         new_message_obj = Messages(id=f'assistant-{random.randint(1000000, 10000000)}', message=response_text,
