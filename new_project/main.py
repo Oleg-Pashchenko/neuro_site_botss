@@ -1,22 +1,22 @@
 import tornado.ioloop
 import tornado.web
-import json
 from urllib.parse import unquote
-
-# Словарь для хранения данных пользователя
-user_data = {}
 
 
 class PostDataHandler(tornado.web.RequestHandler):
-    async def post(self, username):
-        print(username)
+    async def _get_request_dict(self):
         decoded_data = unquote(self.request.body.decode('utf-8')).split('&')
         request_dict = {}
         for el in decoded_data:
             params = el.split('=')
             k, v = params[0], params[1]
             request_dict[k] = v
-        print(request_dict)
+        return request_dict
+
+    async def post(self, username):
+        request_dict = await self._get_request_dict()
+        print(username, request_dict)
+
 
 def make_app():
     return tornado.web.Application([
