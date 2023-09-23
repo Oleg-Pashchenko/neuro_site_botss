@@ -52,7 +52,7 @@ class PostDataHandler(tornado.web.RequestHandler):
         message_objects = session.query(Messages).filter_by(lead_id=lead_id).all()[::-1]
         messages = []
         symbols = 16385 if '16k' in request_settings.model else 4097
-        symbols = symbols * 3 - len(request_settings.text) - request_settings.tokens
+        symbols = (symbols - request_settings.tokens) * 3 - len(request_settings.text)
         for message_obj in message_objects:
             if symbols - len(message_obj.message) <= 0:
                 break
