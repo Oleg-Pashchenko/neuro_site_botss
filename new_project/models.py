@@ -73,6 +73,7 @@ class RequestSettings:
             password=os.getenv('DB_PASSWORD')
         )
         cur = conn.cursor()
+        print(user_id)
         cur.execute("SELECT * FROM users_application_amocrm_settings WHERE user_id_id=%s;", (user_id,))
         info = cur.fetchone()
         conn.close()
@@ -80,6 +81,6 @@ class RequestSettings:
         self.user, self.password, self.host, self.amo_key = info[2], info[3], info[1], info[4]
 
 
-# Base.metadata.create_all(engine)
+#Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
