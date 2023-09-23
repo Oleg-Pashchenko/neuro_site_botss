@@ -96,10 +96,9 @@ class PostDataHandler(tornado.web.RequestHandler):
 
         lead = session.query(Leads).filter_by(id=lead_id).first()
         request_settings = RequestSettings(lead.pipeline_id, username)
-        print(vars(request_settings))
         if 'message[add][0][attachment][link]' in r_d.keys():
             if request_settings.voice:
-                message = misc.wisper_detect(r_d['message[add][0][attachment][link]'])
+                message = await misc.wisper_detect(r_d['message[add][0][attachment][link]'])
             else:
                 return 'ok'
 
