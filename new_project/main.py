@@ -77,11 +77,7 @@ class PostDataHandler(tornado.web.RequestHandler):
         return response['choices'][0]['message']['content']
 
     async def _message_is_not_last(self, lead_id, message):
-        messages = session.query(Messages).filter_by(lead_id=lead_id, is_bot=False).all()
-        print(*messages, sep='\n')
-        print(message)
-        return not messages[-1] == message
-
+        return not session.query(Messages).filter_by(lead_id=lead_id, is_bot=False).all()[-1].message == message
 
     async def post(self, username):
         r_d = await self._get_request_dict()
@@ -93,9 +89,8 @@ class PostDataHandler(tornado.web.RequestHandler):
         if await self.message_already_exists(message_id):
             return 'ok'
 
-        message, lead_id = r_d['message[add][0][text]'], r_d['message[add][0][element_id]']
+        message, lead_id = r_d['message[add][0][text]'].replace('+', ' '), r_d['message[add][0][element_id]']
         user_id_hash = r_d['message[add][0][chat_id]']
-        print(message)
 
         new_message_obj = Messages(id=message_id, message=message, lead_id=lead_id, is_bot=False)
         session.add(new_message_obj)
@@ -109,7 +104,7 @@ class PostDataHandler(tornado.web.RequestHandler):
             return 'ok'
 
         response_text = await self._get_openai_response(request_settings, lead_id)
-        print(response_text)
+
         if await self._message_is_not_last(lead_id, message):
             return 'ok'
 
@@ -120,11 +115,6 @@ class PostDataHandler(tornado.web.RequestHandler):
 
         amo.send_message(user_id_hash, response_text, request_settings.amo_key, request_settings.host,
                          request_settings.user, request_settings.password)
-
-
-
-
-
 
 
 def make_app():
