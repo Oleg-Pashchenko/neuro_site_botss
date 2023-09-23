@@ -10,14 +10,7 @@ UPDATE_PIPELINE_KEY = 'leads[update][0][pipeline_id]'
 
 
 class PostDataHandler(tornado.web.RequestHandler):
-    def __init__(
-            self,
-            application: "Application",
-            request: httputil.HTTPServerRequest,
-            **kwargs: Any,
-    ):
-        super().__init__(application, request, kwargs)
-        self.r_d = None
+    r_d = None
 
     async def _get_request_dict(self):
         decoded_data = unquote(self.request.body.decode('utf-8')).split('&')
