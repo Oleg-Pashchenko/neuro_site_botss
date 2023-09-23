@@ -1,9 +1,12 @@
 import asyncio
+import random
 
 import openai
 import tornado.ioloop
 import tornado.web
 from urllib.parse import unquote
+
+import amo
 from models import *
 
 NEW_CLIENT_KEY = 'unsorted[add][0][pipeline_id]'
@@ -65,13 +68,17 @@ class PostDataHandler(tornado.web.RequestHandler):
         model = request_settings.ft_model if request_settings.ft_model != '' else request_settings.model
         print(request_settings.openai_api_key)
         openai.api_key = request_settings.openai_api_key
-        response = openai.ChatCompletion.create(
+        response = await openai.ChatCompletion.acreate(
             model=model,
             messages=await self._get_messages(lead_id, request_settings),
             max_tokens=request_settings.tokens,
             temperature=request_settings.temperature
         )
         return response['choices'][0]['message']['content']
+
+    async def _message_is_not_last(self, lead_id, message):
+        return not session.query(Messages).filter_by(lead_id=lead_id, is_bot=False).all()[-1] == message
+
 
     async def post(self, username):
         r_d = await self._get_request_dict()
@@ -84,9 +91,11 @@ class PostDataHandler(tornado.web.RequestHandler):
             return 'ok'
 
         message, lead_id = r_d['message[add][0][text]'], r_d['message[add][0][element_id]']
+        user_id_hash = r_d['message[add][0][chat_id]']
 
         new_message_obj = Messages(id=message_id, message=message, lead_id=lead_id, is_bot=False)
         session.add(new_message_obj)
+        session.commit()
 
         lead = session.query(Leads).filter_by(id=lead_id).first()
         request_settings = RequestSettings(lead.pipeline_id, username)
@@ -94,9 +103,23 @@ class PostDataHandler(tornado.web.RequestHandler):
         if message == '/restart':
             await self.clear_history(lead.pipeline_id)
             return 'ok'
-        #print(vars(request_settings))
+
         response_text = await self._get_openai_response(request_settings, lead_id)
-        print(response_text)
+        if await self._message_is_not_last(lead_id, message):
+            return 'ok'
+
+        new_message_obj = Messages(id=f'assistant-{random.randint(1000000, 10000000)}', message=message,
+                                   lead_id=lead_id, is_bot=True)
+        session.add(new_message_obj)
+        session.commit()
+
+        amo.send_message(user_id_hash, response_text, request_settings.amo_key, request_settings.host,
+                         request_settings.user, request_settings.password)
+
+
+
+
+
 
 
 def make_app():
