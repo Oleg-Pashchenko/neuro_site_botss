@@ -54,6 +54,7 @@ class PostDataHandler(tornado.web.RequestHandler):
         symbols = 16385 if '16k' in request_settings.model else 4097
         symbols = (symbols - request_settings.tokens) * 2 - len(request_settings.text)
         for message_obj in message_objects:
+            print(symbols)
             if symbols - len(message_obj.message) <= 0:
                 break
             if message_obj.is_bot:
