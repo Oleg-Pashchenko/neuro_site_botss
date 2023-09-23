@@ -23,14 +23,15 @@ class PostDataHandler(tornado.web.RequestHandler):
         result = session.query(Leads).filter_by(id=lead_id).first()
         print(result)
 
-
     async def post(self, username):
         r_d = await self._get_request_dict()
         if NEW_CLIENT_KEY in r_d.keys() or UPDATE_PIPELINE_KEY in r_d.keys():
-            lead_id, pipeline_id, status_id = r_d['unsorted[add][0][lead_id]'], r_d['unsorted[add][0][pipeline_id]'],\
-                r_d['leads[update][0][status_id]']
+            k = 'add' if NEW_CLIENT_KEY in r_d.keys() else 'update'
+            lead_id, pipeline_id, status_id = r_d[f'unsorted[{k}][0][lead_id]'], r_d[f'unsorted[{k}][0][pipeline_id]'], \
+                r_d[f'leads[{k}][0][status_id]']
             await self._update_pipeline_information(lead_id, pipeline_id, status_id, username)
             return 'ok'
+
 
 def make_app():
     return tornado.web.Application([
