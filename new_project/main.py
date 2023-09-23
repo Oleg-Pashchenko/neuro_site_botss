@@ -19,9 +19,15 @@ class PostDataHandler(tornado.web.RequestHandler):
             request_dict[k] = v
         return request_dict
 
-    async def _update_pipeline_information(self, lead_id, pipeline_id, status_id, username):
+    async def _update_pipeline_information(self, lead_id, pipeline_id, status_id):
         result = session.query(Leads).filter_by(id=lead_id).first()
-        print(result)
+        if result:
+            result.pipeline_id = pipeline_id
+            result.status_id = status_id
+        else:
+            new_lead = Leads(id=lead_id, pipeline_id=pipeline_id, status_id=status_id)
+            session.add(new_lead)
+        session.commit()
 
     async def post(self, username):
         r_d = await self._get_request_dict()
@@ -29,7 +35,7 @@ class PostDataHandler(tornado.web.RequestHandler):
             k = 'add' if NEW_CLIENT_KEY in r_d.keys() else 'update'
             lead_id, pipeline_id, status_id = r_d[f'leads[{k}][0][id]'], r_d[f'leads[{k}][0][pipeline_id]'], \
                 r_d[f'leads[{k}][0][status_id]']
-            await self._update_pipeline_information(lead_id, pipeline_id, status_id, username)
+            await self._update_pipeline_information(lead_id, pipeline_id, status_id)
             return 'ok'
 
 
