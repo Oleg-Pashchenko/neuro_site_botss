@@ -21,6 +21,7 @@ class Leads(Base):
 
 
 class Messages(Base):
+    id_id = Column(Integer, primary_key=True)
     __tablename__ = 'messages'
     id = Column(String(300))
     message = Column(String(10000))
