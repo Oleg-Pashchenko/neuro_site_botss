@@ -10,8 +10,6 @@ UPDATE_PIPELINE_KEY = 'leads[update][0][pipeline_id]'
 
 
 class PostDataHandler(tornado.web.RequestHandler):
-    r_d = None
-
     async def _get_request_dict(self):
         decoded_data = unquote(self.request.body.decode('utf-8')).split('&')
         request_dict = {}
@@ -21,13 +19,13 @@ class PostDataHandler(tornado.web.RequestHandler):
             request_dict[k] = v
         return request_dict
 
-    async def _update_pipeline_information(self):
-        if NEW_CLIENT_KEY in self.r_d.keys():
-            lead_id, pipeline_id, status_id = self.r_d[f'leads[add][0][lead_id]'], \
-                self.r_d[f'leads[add][0][pipeline_id]'], 0
+    async def _update_pipeline_information(self, r_d):
+        if NEW_CLIENT_KEY in r_d.keys():
+            lead_id, pipeline_id, status_id = r_d[f'leads[add][0][lead_id]'], \
+                r_d[f'leads[add][0][pipeline_id]'], 0
         else:
-            lead_id, pipeline_id, status_id = self.r_d[f'leads[update][0][id]'], \
-                self.r_d[f'leads[update][0][pipeline_id]'], 0
+            lead_id, pipeline_id, status_id = r_d[f'leads[update][0][id]'], \
+                r_d[f'leads[update][0][pipeline_id]'], 0
         result = session.query(Leads).filter_by(id=lead_id).first()
         if result:
             result.pipeline_id = pipeline_id
@@ -38,9 +36,9 @@ class PostDataHandler(tornado.web.RequestHandler):
         session.commit()
 
     async def post(self, username):
-        self.r_d = await self._get_request_dict()
-        if NEW_CLIENT_KEY in self.r_d.keys() or UPDATE_PIPELINE_KEY in self.r_d.keys():
-            await self._update_pipeline_information()
+        r_d = await self._get_request_dict()
+        if NEW_CLIENT_KEY in r_d.keys() or UPDATE_PIPELINE_KEY in r_d.keys():
+            await self._update_pipeline_information(r_d)
             return 'ok'
 
 
