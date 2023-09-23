@@ -1,5 +1,6 @@
 import asyncio
 
+import openai
 import tornado.ioloop
 import tornado.web
 from urllib.parse import unquote
@@ -35,8 +36,23 @@ class PostDataHandler(tornado.web.RequestHandler):
             session.add(new_lead)
         session.commit()
 
+    async def clear_history(self, pipeline_id):
+        result = session.query(Leads).filter_by(pipeline_id=pipeline_id).first()
+        session.query(Messages).filter(Messages.lead_id == result.id).delete()
+        session.commit()
+
     async def message_already_exists(self, r_d):
-        return False  # TODO: написать мне лень
+        result = session.query(Messages).filter_by(id=r_d['message[add][0][id]']).first()
+        return True if result else False
+
+    async def _get_openai_response(self, message, request_settings):
+        response = openai.ChatCompletion.create(
+            model=model_to_use,
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature
+        )
+
 
     async def post(self, username):
         r_d = await self._get_request_dict()
@@ -47,8 +63,14 @@ class PostDataHandler(tornado.web.RequestHandler):
         if await self.message_already_exists(r_d):
             return 'ok'
 
-        entity_id, chat_id = r_d['message[add][0][entity_id]'], r_d['message[add][0][chat_id]']
-        print(r_d)
+        message, pipeline_id = r_d['message[add][0][text]'], r_d['message[add][0][element_id]']
+        request_settings = RequestSettings(pipeline_id, username)
+        if message == '/restart':
+            await self.clear_history(pipeline_id)
+            return 'ok'
+        print(request_settings)
+        # response_text = self._get_openai_response(message, request_settings)
+
 
 def make_app():
     return tornado.web.Application([
@@ -61,3 +83,5 @@ if __name__ == "__main__":
     app.listen(8000, address="0.0.0.0")
     print("Server is running on http://0.0.0.0:8000")
     tornado.ioloop.IOLoop.current().start()
+
+"""{'account[subdomain]': 'appgpt', 'account[id]': '31257294', 'account[_links][self]': 'https://appgpt.amocrm.ru', 'message[add][0][id]': 'd3bac6d3-1b5e-40c2-a054-4e0cfe283edb', 'message[add][0][chat_id]': '54caee02-e383-46d8-a9b7-1fb43f07cffe', 'message[add][0][talk_id]': '100', 'message[add][0][contact_id]': '93589657', 'message[add][0][text]': 'f', 'message[add][0][created_at]': '1695486610', 'message[add][0][element_type]': '2', 'message[add][0][entity_type]': 'lead', 'message[add][0][element_id]': '28455849', 'message[add][0][entity_id]': '28455849', 'message[add][0][type]': 'incoming', 'message[add][0][author][id]': '1db2f5cc-aea4-4f96-8d4f-a256ead5b7b0', 'message[add][0][author][type]': 'external', 'message[add][0][author][name]': 'Oleg', 'message[add][0][author][avatar_url]': 'https://amojo.amocrm.ru/attachments/profiles/1db2f5cc-aea4-4f96-8d4f-a256ead5b7b0/RKCPe-file-1_128x128.jpg', 'message[add][0][origin]': 'telegram'}"""
