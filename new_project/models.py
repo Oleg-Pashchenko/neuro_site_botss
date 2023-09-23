@@ -54,6 +54,7 @@ class RequestSettings:
             password=os.getenv('DB_PASSWORD')
         )
         cur = conn.cursor()
+        print(pipeline_id)
         cur.execute("SELECT * FROM users_application_amocrm_pipelines WHERE id=%s", (pipeline_id,))
         resp = cur.fetchone()
         conn.close()
