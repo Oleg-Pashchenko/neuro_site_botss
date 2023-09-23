@@ -63,7 +63,7 @@ class RequestSettings:
         statuses = []
         for r in resp:
             if r[4] is False:
-                statuses.append(int(r[4]))
+                statuses.append(int(r[0]))
         self.block_statuses = statuses
 
     def _get_data_from_amocrm_db_pipelines(self, pipeline_id):
