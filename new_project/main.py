@@ -44,7 +44,7 @@ class PostDataHandler(tornado.web.RequestHandler):
             await self._update_pipeline_information(r_d)
             return 'ok'
 
-        if self.message_already_exists(r_d):
+        if await self.message_already_exists(r_d):
             return 'ok'
 
         entity_id, chat_id = r_d['message[add][0][entity_id]'], r_d['message[add][0][chat_id]']
