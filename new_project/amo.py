@@ -32,18 +32,16 @@ def get_token(host, mail, password):
         response = session.post(f'{host}oauth2/authorize', headers=headers, data=payload)
         access_token = response.cookies.get('access_token')
         refresh_token = response.cookies.get('refresh_token')
-        print(access_token)
-        print(refresh_token)
         headers['access_token'], headers['refresh_token'] = access_token, refresh_token
         payload = {'request[chats][session][action]': 'create'}
         headers['Host'] = host_2
         response = session.post(f'{host}ajax/v1/chats/session', headers=headers, data=payload)
         token = response.json()['response']['chats']['session']['access_token']
     except Exception as e:
-        print(e)
+
         time.sleep(3)
         return get_token(host, mail, password)
-    print('Amo Token:', token)
+
     return token, session, headers
 
 
@@ -92,11 +90,11 @@ def send_message(receiver_id: str, message: str, account_chat_id, host, mail, pa
             url = f'https://amojo.amocrm.ru/v1/chats/{account_chat_id}/' \
                   f'{receiver_id}/messages?with_video=true&stand=v15'
             response = requests.post(url, headers=headers, data=json.dumps({"text": message}))
-            print(response.status_code)
+
             if response.status_code != 200:
                 raise Exception("Токен не подошел!")
         except Exception as e:
-            print(e, 2)
+
             token, session, _ = get_token(host, mail, password)
             continue
         break
