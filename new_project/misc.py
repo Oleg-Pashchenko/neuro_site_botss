@@ -17,7 +17,6 @@ async def wisper_detect(link: str):
     # make log-Mel spectrogram and move to the same device as the model
     mel = whisper.log_mel_spectrogram(audio).to(model.device)
     _, probs = model.detect_language(mel)
-    print(f"Detected language: {max(probs, key=probs.get)}")
     options = whisper.DecodingOptions(fp16=False)
     result = whisper.decode(model, mel, options)
     return result.text

@@ -43,7 +43,6 @@ class RequestSettings:
     openai_api_key = ''
 
     def __init__(self, pipeline_id, user_id):
-        print(pipeline_id, user_id)
         self._get_data_from_amocrm_db_settings(user_id)
         self._get_data_from_amocrm_db_pipelines(pipeline_id)
 
