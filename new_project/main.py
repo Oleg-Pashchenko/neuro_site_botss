@@ -94,9 +94,9 @@ class PostDataHandler(tornado.web.RequestHandler):
         if message == '/restart':
             await self.clear_history(lead.pipeline_id)
             return 'ok'
-        print(vars(request_settings))
-        #response_text = await self._get_openai_response(request_settings, lead_id)
-        #print(response_text)
+        #print(vars(request_settings))
+        response_text = await self._get_openai_response(request_settings, lead_id)
+        print(response_text)
 
 
 def make_app():
