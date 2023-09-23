@@ -63,6 +63,7 @@ class PostDataHandler(tornado.web.RequestHandler):
 
     async def _get_openai_response(self, request_settings: RequestSettings, lead_id):
         model = request_settings.ft_model if request_settings.ft_model != '' else request_settings.model
+        print(request_settings.openai_api_key)
         openai.api_key = request_settings.openai_api_key
         response = openai.ChatCompletion.create(
             model=model,
