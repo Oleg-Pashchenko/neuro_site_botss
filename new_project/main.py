@@ -39,7 +39,7 @@ class PostDataHandler(tornado.web.RequestHandler):
             await self._update_pipeline_information(r_d)
         else:
             print(username)
-
+        self.write('ok')
 
 
 def make_app():
