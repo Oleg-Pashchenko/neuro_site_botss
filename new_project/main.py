@@ -34,8 +34,6 @@ class PostDataHandler(tornado.web.RequestHandler):
         session.commit()
 
     async def post(self, username):
-        print(username)
-        return 'ok'
         r_d = await self._get_request_dict()
         if NEW_CLIENT_KEY in r_d.keys() or UPDATE_PIPELINE_KEY in r_d.keys():
             await self._update_pipeline_information(r_d)
