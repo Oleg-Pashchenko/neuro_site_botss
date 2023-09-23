@@ -108,7 +108,7 @@ class PostDataHandler(tornado.web.RequestHandler):
         if await self._message_is_not_last(lead_id, message):
             return 'ok'
 
-        new_message_obj = Messages(id=f'assistant-{random.randint(1000000, 10000000)}', message=message,
+        new_message_obj = Messages(id=f'assistant-{random.randint(1000000, 10000000)}', message=response_text,
                                    lead_id=lead_id, is_bot=True)
         session.add(new_message_obj)
         session.commit()
