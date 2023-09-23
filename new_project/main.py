@@ -32,6 +32,7 @@ class PostDataHandler(tornado.web.RequestHandler):
     async def post(self, username):
         r_d = await self._get_request_dict()
         if NEW_CLIENT_KEY in r_d.keys() or UPDATE_PIPELINE_KEY in r_d.keys():
+            print(r_d)
             k = 'add' if NEW_CLIENT_KEY in r_d.keys() else 'update'
             lead_id, pipeline_id, status_id = r_d[f'leads[{k}][0][id]'], r_d[f'leads[{k}][0][pipeline_id]'], \
                 r_d[f'leads[{k}][0][status_id]']
