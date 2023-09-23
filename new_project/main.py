@@ -93,12 +93,20 @@ class PostDataHandler(tornado.web.RequestHandler):
         message, lead_id = r_d['message[add][0][text]'].replace('+', ' '), r_d['message[add][0][element_id]']
         user_id_hash = r_d['message[add][0][chat_id]']
 
+        lead = session.query(Leads).filter_by(id=lead_id).first()
+        request_settings = RequestSettings(lead.pipeline_id, username)
+
+        if 'message[add][0][attachment][link]' in r_d.keys():
+            if request_settings.voice:
+                message = misc.wisper_detect(r_d['message[add][0][attachment][link]'])
+            else:
+                return 'ok'
+
+
         new_message_obj = Messages(id=message_id, message=message, lead_id=lead_id, is_bot=False)
         session.add(new_message_obj)
         session.commit()
 
-        lead = session.query(Leads).filter_by(id=lead_id).first()
-        request_settings = RequestSettings(lead.pipeline_id, username)
         if message == '/restart':
             await self.clear_history(lead.pipeline_id)
             return 'ok'
