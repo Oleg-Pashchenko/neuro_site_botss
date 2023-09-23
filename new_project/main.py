@@ -77,7 +77,10 @@ class PostDataHandler(tornado.web.RequestHandler):
         return response['choices'][0]['message']['content']
 
     async def _message_is_not_last(self, lead_id, message):
-        return not session.query(Messages).filter_by(lead_id=lead_id, is_bot=False).all()[-1] == message
+        messages = session.query(Messages).filter_by(lead_id=lead_id, is_bot=False).all()
+        print(*messages, sep='\n')
+        print(message)
+        return not messages[-1] == message
 
 
     async def post(self, username):
