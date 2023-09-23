@@ -76,8 +76,10 @@ class RequestSettings:
         cur = conn.cursor()
         cur.execute("SELECT * FROM users_application_amocrm_settings WHERE user_id_id=%s;", (user_id,))
         info = cur.fetchone()
+        cur.execute('SELECT * FROM users_application_chatgpt_settings WHERE user_id_id=%s;', (user_id,))
+        info2 = cur.fetchone()
+        self.openai_api_key = info2[1]
         conn.close()
-        self.openai_api_key = info[0]
         self.user, self.password, self.host, self.amo_key = info[2], info[3], info[1], info[4]
 
 
