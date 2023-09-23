@@ -8,6 +8,7 @@ import tornado.web
 from urllib.parse import unquote
 
 import amo
+import misc
 from models import *
 
 NEW_CLIENT_KEY = 'unsorted[add][0][pipeline_id]'
