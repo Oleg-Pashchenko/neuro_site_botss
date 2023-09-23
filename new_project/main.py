@@ -52,7 +52,7 @@ class PostDataHandler(tornado.web.RequestHandler):
         message_objects = session.query(Messages).filter_by(lead_id=lead_id).all()[::-1]
         messages = []
         symbols = 16385 if '16k' in request_settings.model else 4097
-        symbols = (symbols - request_settings.tokens) * 3 - len(request_settings.text)
+        symbols = (symbols - request_settings.tokens) * 2 - len(request_settings.text)
         for message_obj in message_objects:
             if symbols - len(message_obj.message) <= 0:
                 break
@@ -62,7 +62,6 @@ class PostDataHandler(tornado.web.RequestHandler):
                 messages.append({'role': 'user', 'content': message_obj.message})
         messages = messages[::-1]
         messages.append({"role": "system", "content": request_settings.text})
-        print(messages)
         return messages
 
     async def _get_openai_response(self, request_settings: RequestSettings, lead_id):
