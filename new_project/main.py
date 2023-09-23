@@ -1,3 +1,5 @@
+import asyncio
+
 import tornado.ioloop
 import tornado.web
 from urllib.parse import unquote
@@ -15,8 +17,9 @@ class PostDataHandler(tornado.web.RequestHandler):
 
     async def post(self, username):
         request_dict = await self._get_request_dict()
-        print(username, request_dict)
-
+        print('start', username)
+        await asyncio.sleep(10)
+        print('finish', username)
 
 def make_app():
     return tornado.web.Application([
