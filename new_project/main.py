@@ -21,7 +21,8 @@ class PostDataHandler(tornado.web.RequestHandler):
 
     async def _update_pipeline_information(self, r_d):
         if NEW_CLIENT_KEY in r_d.keys():
-            lead_id, pipeline_id, status_id = r_d[f'unsorted[add][0][lead_id]'], r_d[f'unsorted[add][0][pipeline_id]'], 0
+            lead_id, pipeline_id, status_id = r_d[f'unsorted[add][0][lead_id]'], r_d[
+                f'unsorted[add][0][pipeline_id]'], 0
         else:
             lead_id, pipeline_id, status_id = r_d[f'leads[update][0][id]'], r_d[f'leads[update][0][pipeline_id]'], \
                 r_d['leads[update][0][status_id]']
@@ -34,14 +35,20 @@ class PostDataHandler(tornado.web.RequestHandler):
             session.add(new_lead)
         session.commit()
 
+    async def message_already_exists(self, r_d):
+        return False  # TODO: написать мне лень
+
     async def post(self, username):
         r_d = await self._get_request_dict()
         if NEW_CLIENT_KEY in r_d.keys() or UPDATE_PIPELINE_KEY in r_d.keys():
             await self._update_pipeline_information(r_d)
-        else:
-            print(username)
+            return 'ok'
 
+        if self.message_already_exists(r_d):
+            return 'ok'
 
+        entity_id, chat_id = r_d['message[add][0][entity_id]'], r_d['message[add][0][chat_id]']
+        print(r_d)
 
 def make_app():
     return tornado.web.Application([
