@@ -27,7 +27,7 @@ class PostDataHandler(tornado.web.RequestHandler):
         r_d = await self._get_request_dict()
         if NEW_CLIENT_KEY in r_d.keys() or UPDATE_PIPELINE_KEY in r_d.keys():
             k = 'add' if NEW_CLIENT_KEY in r_d.keys() else 'update'
-            lead_id, pipeline_id, status_id = r_d[f'leads[{k}][0][lead_id]'], r_d[f'leads[{k}][0][pipeline_id]'], \
+            lead_id, pipeline_id, status_id = r_d[f'leads[{k}][0][id]'], r_d[f'leads[{k}][0][pipeline_id]'], \
                 r_d[f'leads[{k}][0][status_id]']
             await self._update_pipeline_information(lead_id, pipeline_id, status_id, username)
             return 'ok'
