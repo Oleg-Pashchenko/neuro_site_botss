@@ -86,7 +86,7 @@ class PostDataHandler(tornado.web.RequestHandler):
         if NEW_CLIENT_KEY in r_d.keys() or UPDATE_PIPELINE_KEY in r_d.keys():
             await self._update_pipeline_information(r_d)
             return 'ok'
-
+        print(r_d)
         message_id = r_d['message[add][0][id]']
         if await self.message_already_exists(message_id) or int(r_d['message[add][0][created_at]']) + 30 < int(
                 time.time()):
