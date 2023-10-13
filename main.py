@@ -64,13 +64,6 @@ def main(username):
     api_key, user, password, host, amo_key = get_db_info(username)
     request_dict = request.form.to_dict()
 
-    
-
-
-
-
-
-
     if 'unsorted[add][0][pipeline_id]' in request_dict.keys():
         db1 = json.load(open('users_db.json', 'r', encoding='UTF-8'))
         db1[request_dict['unsorted[add][0][lead_id]']] = request_dict['unsorted[add][0][pipeline_id]']
@@ -82,7 +75,6 @@ def main(username):
     elif 'leads[update][0][pipeline_id]' in request_dict.keys():
         if int(request_dict['leads[update][0][updated_at]']) + 5 < int(time.time()): return 'ok'
         print('Обновление Pipeline')
-        print(request_dict)
         fl = False
         db1 = json.load(open('users_db.json', 'r', encoding='UTF-8'))
         try:
