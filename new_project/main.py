@@ -85,11 +85,12 @@ class PostDataHandler(tornado.web.RequestHandler):
         r_d = await self._get_request_dict()
         if NEW_CLIENT_KEY in r_d.keys() or UPDATE_PIPELINE_KEY in r_d.keys():
             await self._update_pipeline_information(r_d)
+            print("Новый клиент!")
             return 'ok'
-        print(r_d)
         message_id = r_d['message[add][0][id]']
         if await self.message_already_exists(message_id) or int(r_d['message[add][0][created_at]']) + 30 < int(
                 time.time()):
+            print("Сообщение уже существует!")
             return 'ok'
 
         message, lead_id = r_d['message[add][0][text]'].replace('+', ' '), r_d['message[add][0][element_id]']
@@ -98,27 +99,30 @@ class PostDataHandler(tornado.web.RequestHandler):
         lead = session.query(Leads).filter_by(id=lead_id).first()
         request_settings = RequestSettings(lead.pipeline_id, username)
         if int(lead.status_id) in request_settings.block_statuses:
+            print("На данном статусе сделки бот не работает!")
             return 'ok'
-
 
         if 'message[add][0][attachment][link]' in r_d.keys():
             if request_settings.voice:
+                print('Распознаю гс')
                 message = await misc.wisper_detect(r_d['message[add][0][attachment][link]'])
             else:
+                print('Отправлено голосовое, но распознование выключено!')
                 return 'ok'
-
 
         new_message_obj = Messages(id=message_id, message=message, lead_id=lead_id, is_bot=False)
         session.add(new_message_obj)
         session.commit()
 
         if message == '/restart':
+            print('Очищаю историю')
             await self.clear_history(lead.pipeline_id)
             return 'ok'
 
         response_text = await self._get_openai_response(request_settings, lead_id)
 
         if await self._message_is_not_last(lead_id, message):
+            print('Сообщение не последнее!')
             return 'ok'
 
         new_message_obj = Messages(id=f'assistant-{random.randint(1000000, 10000000)}', message=response_text,
@@ -128,6 +132,7 @@ class PostDataHandler(tornado.web.RequestHandler):
 
         amo.send_message(user_id_hash, response_text, request_settings.amo_key, request_settings.host,
                          request_settings.user, request_settings.password)
+        print('Сообщение отправлено!')
 
 
 def make_app():
