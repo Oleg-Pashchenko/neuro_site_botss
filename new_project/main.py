@@ -26,20 +26,24 @@ class PostDataHandler(tornado.web.RequestHandler):
         return request_dict
 
     async def _update_pipeline_information(self, r_d):
-        if NEW_CLIENT_KEY in r_d.keys():
-            lead_id, pipeline_id, status_id = r_d[f'unsorted[add][0][lead_id]'], r_d[
-                f'unsorted[add][0][pipeline_id]'], 0
-        else:
-            lead_id, pipeline_id, status_id = r_d[f'leads[update][0][id]'], r_d[f'leads[update][0][pipeline_id]'], \
-                r_d['leads[update][0][status_id]']
-        result = session.query(Leads).filter_by(id=lead_id).first()
+        try:
+            if NEW_CLIENT_KEY in r_d.keys():
+                lead_id, pipeline_id, status_id = r_d[f'unsorted[add][0][lead_id]'], r_d[
+                    f'unsorted[add][0][pipeline_id]'], 0
+            else:
+                lead_id, pipeline_id, status_id = r_d[f'leads[update][0][id]'], r_d[f'leads[update][0][pipeline_id]'], \
+                    r_d['leads[update][0][status_id]']
+            result = session.query(Leads).filter_by(id=lead_id).first()
 
-        if result:
-            result.pipeline_id, result.status_id = pipeline_id, status_id
-        else:
-            new_lead = Leads(id=lead_id, pipeline_id=pipeline_id, status_id=status_id)
-            session.add(new_lead)
-        session.commit()
+            if result:
+                result.pipeline_id, result.status_id = pipeline_id, status_id
+            else:
+                new_lead = Leads(id=lead_id, pipeline_id=pipeline_id, status_id=status_id)
+                session.add(new_lead)
+            session.commit()
+            print('Новый клиент!')
+        except:
+            pass
 
     async def clear_history(self, pipeline_id):
         result = session.query(Leads).filter_by(pipeline_id=pipeline_id).first()
@@ -85,12 +89,10 @@ class PostDataHandler(tornado.web.RequestHandler):
         r_d = await self._get_request_dict()
         if NEW_CLIENT_KEY in r_d.keys() or UPDATE_PIPELINE_KEY in r_d.keys():
             await self._update_pipeline_information(r_d)
-            print("Новый клиент!")
             return 'ok'
         message_id = r_d['message[add][0][id]']
         if await self.message_already_exists(message_id) or int(r_d['message[add][0][created_at]']) + 30 < int(
                 time.time()):
-            print("Сообщение уже существует!")
             return 'ok'
 
         message, lead_id = r_d['message[add][0][text]'].replace('+', ' '), r_d['message[add][0][element_id]']
