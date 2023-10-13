@@ -41,7 +41,6 @@ class PostDataHandler(tornado.web.RequestHandler):
                 new_lead = Leads(id=lead_id, pipeline_id=pipeline_id, status_id=status_id)
                 session.add(new_lead)
             session.commit()
-            print('Новый клиент!')
         except:
             pass
 
