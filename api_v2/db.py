@@ -92,11 +92,11 @@ class RequestSettings:
         self.voice = bool(resp[8])
         self.filename = resp[11]
         self.work_rule = resp[12]
-        self.file_link = resp[13]
-        self.db_error_message = resp[14]
-        self.hi_message = resp[15]
-        self.openai_error_message = resp[16]
-        self.success_message = resp[17]
+        self.file_link = resp[15]
+        self.db_error_message = resp[16]
+        self.hi_message = resp[17]
+        self.openai_error_message = resp[18]
+        self.success_message = resp[19]
 
     def _get_data_from_amocrm_db_settings(self, user_id):
         conn = psycopg2.connect(
