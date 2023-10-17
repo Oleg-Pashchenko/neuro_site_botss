@@ -125,6 +125,7 @@ def execute_db_mode(request_message, request_settings: db.RequestSettings):
         file_id = request_settings.file_link.split("/")[-2]
         try:
             download_url = f"https://drive.google.com/uc?id={file_id}"
+            print(download_url)
             output_path = f"files/{file_id}.xlsx"
             gdown.download(download_url, output_path, quiet=True)
         except:
