@@ -120,6 +120,7 @@ def execute_db_mode(request_message, request_settings: db.RequestSettings):
     db_name = 'files/' + request_settings.filename
 
     if not os.path.exists(db_name):
+        print('Donwloading file')
         import gdown
         file_id = request_settings.file_link.split("/")[-2]
         try:
