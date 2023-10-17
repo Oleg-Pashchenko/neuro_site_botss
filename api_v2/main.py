@@ -24,11 +24,11 @@ class PostDataHandler(tornado.web.RequestHandler):
         r_d = await self._get_request_dict()
         if NEW_CLIENT_KEY in r_d.keys() or UPDATE_PIPELINE_KEY in r_d.keys():
             await db.update_pipeline_information(r_d)
-            return 'Сделка успешно создана!'
+            return print('Сделка успешно создана!')
 
         message_id = r_d[MESSAGE_ID_KEY]
         if await db.message_already_exists(message_id) or int(r_d[MESSAGE_CREATION_KEY]) + 30 < int(time.time()):
-            return 'Сообщение уже распознавалось!'
+            return print('Сообщение уже распознавалось!')
 
         message, lead_id, user_id_hash = r_d[MESSAGE_KEY].replace('+', ' '), r_d[LEAD_KEY], r_d[USER_ID_HASH_KEY]
 
@@ -36,31 +36,31 @@ class PostDataHandler(tornado.web.RequestHandler):
         request_settings = db.RequestSettings(lead.pipeline_id, username)
 
         if int(lead.status_id) in request_settings.block_statuses:
-            return "На данном статусе сделки бот не работает!"
+            return print("На данном статусе сделки бот не работает!")
 
         if VOICE_MESSAGE_KEY in r_d.keys():
             if request_settings.voice:
                 message = await misc.wisper_detect(r_d['message[add][0][attachment][link]'])
             else:
-                return 'Отправлено голосовое, но распознование выключено!'
+                return print('Отправлено голосовое, но распознование выключено!')
 
         await db.add_new_message(message_id=message_id, message=message, lead_id=lead_id, is_bot=False)
 
         if message == RESTART_KEY:
             await db.clear_history(lead.pipeline_id)
-            return 'История успешно очищена!'
+            return print('История успешно очищена!')
 
         response_text = await openai_methods.get_openai_response(request_settings, lead_id, message)
 
         if await db.message_is_not_last(lead_id, message):
-            return 'Сообщение не последнее! Обработка прервана!'
+            return print('Сообщение не последнее! Обработка прервана!')
 
         new_message_id = f'assistant-{random.randint(1000000, 10000000)}'
         await db.add_new_message(message_id=new_message_id, message=response_text, lead_id=lead_id, is_bot=True)
 
         amo_methods.send_message(user_id_hash, response_text, request_settings.amo_key, request_settings.host,
                                  request_settings.user, request_settings.password)
-        return 'Сообщение отправлено!'
+        return print('Сообщение отправлено!')
 
 
 class SyncDatabaseHandler(tornado.web.RequestHandler):
@@ -78,5 +78,5 @@ def make_app():
 if __name__ == "__main__":
     app = make_app()
     app.listen(5000, address="0.0.0.0")
-    print("Server is running on http://0.0.0.0:8000")
+    print("Server is running on http://0.0.0.0:5000")
     tornado.ioloop.IOLoop.current().start()
