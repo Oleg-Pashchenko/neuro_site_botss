@@ -122,7 +122,7 @@ def execute_db_mode(request_message, request_settings: db.RequestSettings):
     if not os.path.exists(db_name):
         print('Donwloading file')
         import gdown
-        file_id = request_settings.file_link.split("/")[-2]
+        file_id = request_settings.file_link.split("/")[-1]
         try:
             download_url = f"https://drive.google.com/uc?id={file_id}"
             print(download_url)
