@@ -1,4 +1,4 @@
-from api_v2.utils.constants import *
+from utils.constants import *
 
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import sessionmaker, relationship

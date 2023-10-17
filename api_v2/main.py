@@ -4,10 +4,10 @@ import time
 import tornado.ioloop
 import tornado.web
 from urllib.parse import unquote
-from api_v2 import db, openai_methods
-from api_v2.utils.constants import *
-from api_v2.utils import misc
-from api_v2 import amo_methods
+import db, openai_methods
+from utils.constants import *
+from utils import misc
+import amo_methods
 import gdown
 
 class PostDataHandler(tornado.web.RequestHandler):

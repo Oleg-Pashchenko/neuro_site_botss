@@ -1,7 +1,7 @@
 import os
 
-from api_v2 import db
-from api_v2.utils.constants import *
+import db
+from utils.constants import *
 import json
 import pandas as pd
 import openai
