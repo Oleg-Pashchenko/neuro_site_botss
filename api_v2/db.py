@@ -108,7 +108,7 @@ class RequestSettings:
         cur = conn.cursor()
         cur.execute("SELECT * FROM home_amoconnect WHERE user_id=%s;", (user_id,))
         info = cur.fetchone()
-        cur.execute('SELECT * FROM home_amoconnect WHERE user_id=%s;', (user_id,))
+        cur.execute('SELECT * FROM home_gptapikey WHERE user_id=%s;', (user_id,))
         info2 = cur.fetchone()
         self.openai_api_key = info2[1]
         conn.close()
