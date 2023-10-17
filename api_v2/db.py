@@ -56,7 +56,7 @@ class RequestSettings:
     def _get_data_from_amocrm_db_statuses(self):
         conn = psycopg2.connect(
             host=os.getenv('DB_HOST'),
-            database=os.getenv('DB_NAME'),
+            database='avatarex_db',
             user=os.getenv('DB_USER'),
             password=os.getenv('DB_PASSWORD')
         )
@@ -73,7 +73,7 @@ class RequestSettings:
     def _get_data_from_amocrm_db_pipelines(self, pipeline_id):
         conn = psycopg2.connect(
             host=os.getenv('DB_HOST'),
-            database=os.getenv('DB_NAME'),
+            database='avatarex_db',
             user=os.getenv('DB_USER'),
             password=os.getenv('DB_PASSWORD')
         )
@@ -101,7 +101,7 @@ class RequestSettings:
     def _get_data_from_amocrm_db_settings(self, user_id):
         conn = psycopg2.connect(
             host=os.getenv('DB_HOST'),
-            database=os.getenv('DB_NAME'),
+            database='avatarex_db',
             user=os.getenv('DB_USER'),
             password=os.getenv('DB_PASSWORD')
         )
