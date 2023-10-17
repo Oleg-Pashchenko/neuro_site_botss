@@ -95,12 +95,12 @@ def prepare_to_answer(choices, to_view):
     return resp
 
 
-def get_keywords_values(message):
+def get_keywords_values(message, filename):
     messages = [
         {'role': 'system', 'content': 'Give answer:'},
         {"role": "user",
          "content": message}]
-    func = get_function('Avatarex.xlsx')
+    func = get_function(filename)
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo-0613",
         messages=messages,
@@ -135,7 +135,7 @@ def execute_db_mode(request_message, request_settings: db.RequestSettings):
                        'db_error': request_settings.db_error_message,
                        'success': request_settings.success_message,
                        'start': request_settings.hi_message}
-    openai_response = get_keywords_values(request_message)
+    openai_response = get_keywords_values(request_message, db_name)
 
     if openai_response['is_ok'] is True:
         choices, to_view = find_from_database(db_name, openai_response['args'], rules)
