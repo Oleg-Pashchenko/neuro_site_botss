@@ -136,7 +136,7 @@ def execute_db_mode(request_message, request_settings: db.RequestSettings):
                        'success': request_settings.success_message,
                        'start': request_settings.hi_message}
     openai_response = get_keywords_values(request_message, db_name)
-
+    print(openai_response)
     if openai_response['is_ok'] is True:
         choices, to_view = find_from_database(db_name, openai_response['args'], rules)
         if len(choices) == 0:
