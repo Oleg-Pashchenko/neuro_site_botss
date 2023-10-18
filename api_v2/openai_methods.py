@@ -92,6 +92,7 @@ def prepare_to_answer(choices, to_view, view_rule="https://tolerance-homes.ru/ob
             resp += f'\n{view_rule}'
         except:
             pass
+    print(resp)
     return resp
 
 
