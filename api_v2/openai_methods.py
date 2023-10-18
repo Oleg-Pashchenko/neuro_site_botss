@@ -87,7 +87,7 @@ def prepare_to_answer(choices, to_view):
     for i, choice in enumerate(choices):
         text = ''
         for v in to_view:
-            text += choice[v] + ' '
+            text += str(choice[v]) + ' '
         try:
             resp += f'\n[{i + 1}] {text}'
         except:
