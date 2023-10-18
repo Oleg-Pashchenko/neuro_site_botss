@@ -84,6 +84,7 @@ def find_from_database(filename, params, rules):
 
 def prepare_to_answer(choices, to_view):
     resp = ""
+    print(to_view)
     for i, choice in enumerate(choices):
         text = ''
         for v in to_view:
