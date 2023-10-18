@@ -82,15 +82,14 @@ def find_from_database(filename, params, rules):
     return responses, to_view
 
 
-def prepare_to_answer(choices, to_view):
+def prepare_to_answer(choices, to_view, view_rule="https://tolerance-homes.ru/objects/{id}"):
     resp = ""
     print(to_view)
     for i, choice in enumerate(choices):
-        text = ''
         for v in to_view:
-            text += str(choice[v]) + ' '
+            view_rule = view_rule.replace("{" + str(v) + "}", str(choice[v]))
         try:
-            resp += f'\n[{i + 1}] {text}'
+            resp += f'\n{view_rule}'
         except:
             pass
     return resp
