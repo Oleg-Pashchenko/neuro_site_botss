@@ -47,6 +47,7 @@ class RequestSettings:
     working_mode = ''
     view_rule = ''
     table_id = ''
+    results_count = ''
     block_statuses = []
 
     def __init__(self, pipeline_id, user_id):
@@ -99,6 +100,7 @@ class RequestSettings:
         self.openai_error_message = resp[18]
         self.success_message = resp[19]
         self.view_rule = resp[20]
+        self.results_count = resp[21]
 
     def _get_data_from_amocrm_db_settings(self, user_id):
         conn = psycopg2.connect(

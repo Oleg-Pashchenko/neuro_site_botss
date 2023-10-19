@@ -83,13 +83,13 @@ def find_from_database(filename, params, rules):
     return responses, to_view
 
 
-def prepare_to_answer(choices, to_view, view_rule="https://tolerance-homes.ru/objects/{id}"):
+def prepare_to_answer(choices, to_view, view_rule, results_count=1):
     resp = ""
     print(to_view)
-    for i, choice in enumerate(choices[:10]):
+    for i, choice in enumerate(choices[:results_count]):
         print(choice)
         rule = view_rule
-        for v in to_view:
+        for v in choices[0].keys():
             rule = rule.replace("{" + str(v) + "}", str(choice[v]))
         resp += f'\n{rule}'
     return resp
@@ -142,7 +142,7 @@ def execute_db_mode(request_message, request_settings: db.RequestSettings):
         if len(choices) == 0:
             return answer_messages['db_error']
         else:
-            prepared_message = prepare_to_answer(choices, to_view, request_settings.view_rule)
+            prepared_message = prepare_to_answer(choices, to_view, request_settings.view_rule, request_settings.results_count)
             return answer_messages['success'] + '\n' + prepared_message
     else:
         return answer_messages['openai_error']
