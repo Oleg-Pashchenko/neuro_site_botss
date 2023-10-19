@@ -73,8 +73,8 @@ def find_from_database(filename, params, rules):
                     approved = False
                 elif rules[k] == '!' and not (k in to_view):
                     to_view.append(k)
-            except:
-                pass
+            except Exception as e:
+                print(e)
             if not approved:
                 break
         if approved:
