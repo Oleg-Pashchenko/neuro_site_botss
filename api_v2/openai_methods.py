@@ -60,7 +60,7 @@ def find_from_database(filename, params, rules):
     for d in list_of_arrays:
         approved = True
         for k, v in d.items():
-            if rules[k] == '>=':
+            if rules[k] == '<=':
                 print((int(v) >= int(params[k])))
             try:
                 if rules[k] == '=' and v != params[k]:
@@ -77,7 +77,7 @@ def find_from_database(filename, params, rules):
                 elif rules[k] == '!' and not (k in to_view):
                     to_view.append(k)
             except Exception as e:
-                print(e)
+                approved = False
             if not approved:
                 break
         if approved:
