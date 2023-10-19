@@ -87,9 +87,10 @@ def prepare_to_answer(choices, to_view, view_rule="https://tolerance-homes.ru/ob
     print(to_view)
     for i, choice in enumerate(choices[:10]):
         print(choice)
+        rule = view_rule
         for v in to_view:
-            view_rule = view_rule.replace("{" + str(v) + "}", str(choice[v]))
-            resp += f'\n{view_rule}'
+            rule = rule.replace("{" + str(v) + "}", str(choice[v]))
+        resp += f'\n{rule}'
     return resp
 
 
