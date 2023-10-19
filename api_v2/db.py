@@ -45,6 +45,7 @@ class RequestSettings:
     amo_key = ''
     openai_api_key = ''
     working_mode = ''
+    view_rule = ''
     table_id = ''
     block_statuses = []
 
@@ -97,6 +98,7 @@ class RequestSettings:
         self.hi_message = resp[17]
         self.openai_error_message = resp[18]
         self.success_message = resp[19]
+        self.view_rule = resp[20]
 
     def _get_data_from_amocrm_db_settings(self, user_id):
         conn = psycopg2.connect(

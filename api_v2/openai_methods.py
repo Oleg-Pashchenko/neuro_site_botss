@@ -142,7 +142,7 @@ def execute_db_mode(request_message, request_settings: db.RequestSettings):
         if len(choices) == 0:
             return answer_messages['db_error']
         else:
-            prepared_message = prepare_to_answer(choices, to_view)
+            prepared_message = prepare_to_answer(choices, to_view, request_settings.view_rule)
             return answer_messages['success'] + '\n' + prepared_message
     else:
         return answer_messages['openai_error']
