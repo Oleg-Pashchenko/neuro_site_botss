@@ -84,11 +84,11 @@ def find_from_database(filename, params, rules):
 
 def prepare_to_answer(choices, to_view, view_rule="https://tolerance-homes.ru/objects/{id}"):
     resp = ""
-    print(to_view)
-    for i, choice in enumerate(choices):
+    print(to_view, len(choices))
+    for i, choice in enumerate(choices[:10]):
         for v in to_view:
             view_rule = view_rule.replace("{" + str(v) + "}", str(choice[v]))
-            print(view_rule)
+
         try:
             resp += f'\n{view_rule}'
         except:
