@@ -88,11 +88,12 @@ def prepare_to_answer(choices, to_view, view_rule="https://tolerance-homes.ru/ob
     for i, choice in enumerate(choices):
         for v in to_view:
             view_rule = view_rule.replace("{" + str(v) + "}", str(choice[v]))
+            print(view_rule)
         try:
             resp += f'\n{view_rule}'
         except:
             pass
-    print(resp)
+
     return resp
 
 
