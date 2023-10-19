@@ -56,10 +56,12 @@ def find_from_database(filename, params, rules):
     list_of_arrays = df.to_dict(orient='records')
     responses = []
     to_view = []
+    print(rules)
     for d in list_of_arrays:
         approved = True
         for k, v in d.items():
-            print(rules[k] == '>=' and not (int(v) >= int(params[k])))
+            if rules[k] == '>=':
+                print((int(v) >= int(params[k])))
             try:
                 if rules[k] == '=' and v != params[k]:
                     approved = False
