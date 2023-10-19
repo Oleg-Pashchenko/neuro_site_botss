@@ -62,14 +62,14 @@ def find_from_database(filename, params, rules):
             try:
                 if rules[k] == '=' and v != params[k]:
                     approved = False
-                elif rules[k] == '>=' and not (v >= params[k]):
+                elif rules[k] == '>=' and not (int(v) >= int(params[k])):
                     """Введенное значение должно быть больше или равно заданому"""
                     approved = False
-                elif rules[k] == '<=' and not (v <= params[k]):
+                elif rules[k] == '<=' and not (int(v) <= int(params[k])):
                     approved = False
-                elif rules[k] == '>' and not (v > params[k]):
+                elif rules[k] == '>' and not (int(v) > int(params[k])):
                     approved = False
-                elif rules[k] == '<' and not (v < params[k]):
+                elif rules[k] == '<' and not (int(v) < int(params[k])):
                     approved = False
                 elif rules[k] == '!' and not (k in to_view):
                     to_view.append(k)
