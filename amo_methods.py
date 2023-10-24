@@ -132,6 +132,25 @@ def get_field_by_name(name: str, host: str, mail: str, password: str, lead_id: i
     return True, int(response.text.split(f',"NAME":"{name}"')[0].split('"ID":')[-1])
 
 
+def get_field_value_by_name(name: str, host: str, mail: str, password: str, lead_id: int) -> (bool, int):
+    url = f'{host}leads/detail/{lead_id}'
+    token, session, headers = get_token(host, mail, password)
+    response = session.get(url)
+    if f'"NAME":"{name}"' not in response.text:
+        return False, 0
+
+    param_id = int(response.text.split(f',"NAME":"{name}"')[0].split('"ID":')[-1])
+    soup = bs4.BeautifulSoup(response.text, features='html.parser')
+    status = False
+    try:
+        value = soup.find('input', {'name': f'CFV[{param_id}]'})['value']
+        if value == '':
+            status = True
+    except:
+        pass
+    return status, 0
+
+
 def set_field_by_name(param_id: int, host: str, mail: str, password: str, value: str, lead_id: int, pipeline_id: int):
     url = f'{host}ajax/leads/detail/'
     data = {
@@ -156,7 +175,7 @@ def fill_field(name, value, host, mail, password, lead_id, pipeline_id):
 def get_field_info(q_m: db.QualificationMode, host, mail, password, lead_id):
     all_fields_qualified, first_uncompleted_field_description, second_uncompleted_field_description, first_field_name = True, '', '', ''
     for k in q_m.q_rules.keys():
-        exists, field_id = get_field_by_name(k, host, mail, password, lead_id)
+        exists, field_id = get_field_value_by_name(k, host, mail, password, lead_id)
         if not exists:
             all_fields_qualified = False
             if first_uncompleted_field_description == '':

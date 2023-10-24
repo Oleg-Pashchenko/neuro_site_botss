@@ -148,7 +148,6 @@ def execute(message, request_settings: db.RequestSettings, lead_id, user_id_hash
             return f"{resp}\n\n{question}"
         return resp
 
-
     if not all_fields_qualified:
         print('Остались неквалифицированные поля')
         answer_correct = check_question_answer(first_uncompleted_field_description, message, request_settings)
