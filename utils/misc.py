@@ -25,7 +25,7 @@ async def wisper_detect(link: str):
 
 def download_file(db_name):
     file_id = db_name.split("id=")[1]
-    download_url = f"https://drive.google.com/uc?id={file_id}"
+    download_url = db_name
     output_path = f"files/{file_id}.xlsx"
 
     if not os.path.exists(output_path):

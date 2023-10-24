@@ -144,7 +144,7 @@ def get_field_value_by_name(name: str, host: str, mail: str, password: str, lead
     status = False
     try:
         value = soup.find('input', {'name': f'CFV[{param_id}]'})['value']
-        print(f'{value=}')
+
         if value == '':
             status = True
     except Exception as e:
@@ -177,7 +177,7 @@ def get_field_info(q_m: db.QualificationMode, host, mail, password, lead_id):
     all_fields_qualified, first_uncompleted_field_description, second_uncompleted_field_description, first_field_name = True, '', '', ''
     for k in q_m.q_rules.keys():
         exists, field_id = get_field_value_by_name(k, host, mail, password, lead_id)
-        if not exists:
+        if exists:
             all_fields_qualified = False
             if first_uncompleted_field_description == '':
                 first_field_name = k
