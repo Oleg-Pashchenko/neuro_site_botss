@@ -24,11 +24,11 @@ async def wisper_detect(link: str):
 
 
 
-def download_file(db_name, request_settings):
+def download_file(db_name):
     if not os.path.exists(db_name):
         print('Donwloading file')
         import gdown
-        file_id = request_settings.file_link.split("id=")[1]
+        file_id = db_name.split("id=")[1]
         try:
             download_url = f"https://drive.google.com/uc?id={file_id}"
             print(download_url)

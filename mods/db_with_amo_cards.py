@@ -123,7 +123,7 @@ def check_question_answer(question, answer, request_settings):
 def execute(message, request_settings: db.RequestSettings, lead_id, user_id_hash):
     filename = request_settings.qualification_mode.file_link
     q_m = request_settings.qualification_mode
-    misc.download_file(filename, request_settings)
+    misc.download_file(filename)
     is_first_message = False
     bot_answers_count = db.get_bots_answers_count(lead_id)
     if bot_answers_count == 0:
