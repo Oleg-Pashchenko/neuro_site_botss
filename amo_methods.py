@@ -146,8 +146,8 @@ def get_field_value_by_name(name: str, host: str, mail: str, password: str, lead
         value = soup.find('input', {'name': f'CFV[{param_id}]'})['value']
         if value == '':
             status = True
-    except:
-        pass
+    except Exception as e:
+        print(e)
     return status, 0
 
 

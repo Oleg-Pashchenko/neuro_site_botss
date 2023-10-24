@@ -134,7 +134,7 @@ def execute(message, request_settings: db.RequestSettings, lead_id, user_id_hash
                                                                                             request_settings.user,
                                                                                             request_settings.password,
                                                                                             lead_id)
-
+    print(all_fields_qualified, first_uncompleted_field_description, second_uncompleted_field_description, first_field_name)
     if is_first_message:
         print("Это первое сообщение от пользователя")
         resp = perephrase(q_m.hi_message)
