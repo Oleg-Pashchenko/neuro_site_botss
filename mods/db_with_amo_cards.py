@@ -123,6 +123,7 @@ def execute(message, request_settings: db.RequestSettings, lead_id, user_id_hash
         is_first_message = True
 
     if is_first_message:
+        print("Это первое сообщение от пользователя")
         resp = perephrase(q_m.hi_message)
         amo_methods.send_message(user_id_hash, resp, request_settings.amo_key, request_settings.host,
                                  request_settings.user, request_settings.password)
@@ -135,6 +136,7 @@ def execute(message, request_settings: db.RequestSettings, lead_id, user_id_hash
                                                                                             lead_id)
 
     if not all_fields_qualified:
+        print('Остались неквалифицированные поля')
         answer_correct = check_question_answer(first_uncompleted_field_description, message)
 
         if answer_correct['is_ok'] is True and answer_correct['args']['is_correct'] is True:
@@ -148,6 +150,7 @@ def execute(message, request_settings: db.RequestSettings, lead_id, user_id_hash
                                      request_settings.user, request_settings.password)
             return question
 
+    print('Похоже мне задали вопрос!')
     answer = question_mode(message, filename, q_m.db_error_message, q_m.openai_error_message)
 
     amo_methods.send_message(user_id_hash, answer, request_settings.amo_key, request_settings.host,
