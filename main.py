@@ -10,6 +10,7 @@ from utils import misc
 import amo_methods
 import gdown
 
+
 class PostDataHandler(tornado.web.RequestHandler):
     async def _get_request_dict(self):
         decoded_data = unquote(self.request.body.decode('utf-8')).split('&')
@@ -50,16 +51,18 @@ class PostDataHandler(tornado.web.RequestHandler):
             await db.clear_history(lead.pipeline_id)
             return print('История успешно очищена!')
 
-        response_text = await openai_methods.get_openai_response(request_settings, lead_id, message)
+        response_text = await openai_methods.get_openai_response(request_settings, lead_id, message, user_id_hash)
+
         if request_settings.working_mode == DEFAULT_WORKING_MODE:
             if await db.message_is_not_last(lead_id, message):
                 return print('Сообщение не последнее! Обработка прервана!')
 
-            new_message_id = f'assistant-{random.randint(1000000, 10000000)}'
-            await db.add_new_message(message_id=new_message_id, message=response_text, lead_id=lead_id, is_bot=True)
+            amo_methods.send_message(user_id_hash, response_text, request_settings.amo_key, request_settings.host,
+                                     request_settings.user, request_settings.password)
 
-        amo_methods.send_message(user_id_hash, response_text, request_settings.amo_key, request_settings.host,
-                                 request_settings.user, request_settings.password)
+        new_message_id = f'assistant-{random.randint(1000000, 10000000)}'
+        await db.add_new_message(message_id=new_message_id, message=response_text, lead_id=lead_id, is_bot=True)
+
         return print('Сообщение отправлено!')
 
 

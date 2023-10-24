@@ -1,13 +1,15 @@
 import os
 
+import amo_methods
 import db
+from utils import misc
 from utils.constants import *
 import json
 import pandas as pd
 import openai
+from mods import db_with_amo_cards
 
-
-async def get_openai_response(request_settings: db.RequestSettings, lead_id, message):
+async def get_openai_response(request_settings: db.RequestSettings, lead_id, message, user_id_hash):
     model = request_settings.ft_model if request_settings.ft_model != '' else request_settings.model
     openai.api_key = request_settings.openai_api_key
 
@@ -19,8 +21,17 @@ async def get_openai_response(request_settings: db.RequestSettings, lead_id, mes
             temperature=request_settings.temperature
         )
         return response['choices'][0]['message']['content']
+
+    elif request_settings.working_mode == DATABASE_WITH_AMO_CARDS_MODE:
+        return db_with_amo_cards.execute(message, request_settings, lead_id, user_id_hash)
+
+
     else:
-        return execute_db_mode(message, request_settings)
+
+        response_text = execute_db_mode(message, request_settings)
+        amo_methods.send_message(user_id_hash, response_text, request_settings.amo_key, request_settings.host,
+                             request_settings.user, request_settings.password)
+        return response_text
 
 
 def get_function(filename):
@@ -115,21 +126,14 @@ def get_keywords_values(message, filename):
         return {'is_ok': False, 'args': {}}
 
 
+
+
+
 def execute_db_mode(request_message, request_settings: db.RequestSettings):
     rules = request_settings.work_rule
     db_name = 'files/' + request_settings.filename
 
-    if not os.path.exists(db_name):
-        print('Donwloading file')
-        import gdown
-        file_id = request_settings.file_link.split("id=")[1]
-        try:
-            download_url = f"https://drive.google.com/uc?id={file_id}"
-            print(download_url)
-            output_path = f"files/{file_id}.xlsx"
-            gdown.download(download_url, output_path, quiet=True)
-        except:
-            return 'Please, connect database file!'
+    misc.download_file(db_name, request_settings)
 
     answer_messages = {'openai_error': request_settings.openai_error_message,
                        'db_error': request_settings.db_error_message,
@@ -142,7 +146,10 @@ def execute_db_mode(request_message, request_settings: db.RequestSettings):
         if len(choices) == 0:
             return answer_messages['db_error']
         else:
-            prepared_message = prepare_to_answer(choices, to_view, request_settings.view_rule, request_settings.results_count)
+            prepared_message = prepare_to_answer(choices, to_view, request_settings.view_rule,
+                                                 request_settings.results_count)
             return answer_messages['success'] + '\n' + prepared_message
     else:
         return answer_messages['openai_error']
+
+

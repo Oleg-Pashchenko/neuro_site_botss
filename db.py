@@ -1,7 +1,7 @@
 from utils.constants import *
 
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Boolean
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 import os
 import dotenv
@@ -13,6 +13,14 @@ engine = create_engine(f'postgresql://{os.getenv("DB_USER")}:{os.getenv("DB_PASS
                        f'@{os.getenv("DB_HOST")}:5432/{os.getenv("DB_NAME")}')
 
 Base = declarative_base()
+
+conn = psycopg2.connect(
+    host=os.getenv('DB_HOST'),
+    database='avatarex_db',
+    user=os.getenv('DB_USER'),
+    password=os.getenv('DB_PASSWORD')
+)
+cur = conn.cursor()
 
 
 class Leads(Base):
@@ -29,6 +37,28 @@ class Messages(Base):
     message = Column(String(10000))
     lead_id = Column(Integer, ForeignKey('leads.id'))
     is_bot = Column(Boolean)
+
+
+class QualificationMode:
+    id = ''
+    q_rules = ''
+    q_repeat_time = ''
+    q_repeat_count = ''
+    gpt_not_q_message_time = ''
+    gpt_not_q_question_time = ''
+    file_link = ''
+    hi_message = ''
+    openai_error_message = ''
+    db_error_message = ''
+
+    def __init__(self, pipeline_id):
+        cur.execute("SELECT * FROM home_qualificationmode WHERE p_id=%s", (pipeline_id,))
+        r = cur.fetchone()
+        if len(r) == 0:
+            return
+        self.id, self.q_rules, self.q_repeat_time, self.q_repeat_count = r[1], r[2], r[3], r[4]
+        self.gpt_not_q_message_time, self.gpt_not_q_question_time, self.file_link = r[5], r[6], r[7]
+        self.hi_message, self.openai_error_message, self.db_error_message = r[8], r[9], r[10]
 
 
 class RequestSettings:
@@ -49,23 +79,17 @@ class RequestSettings:
     table_id = ''
     results_count = ''
     block_statuses = []
+    qualification_mode = None
 
     def __init__(self, pipeline_id, user_id):
         self._get_data_from_amocrm_db_settings(user_id)
         self._get_data_from_amocrm_db_pipelines(pipeline_id)
         self._get_data_from_amocrm_db_statuses()
+        self.qualification_mode = QualificationMode(pipeline_id)
 
     def _get_data_from_amocrm_db_statuses(self):
-        conn = psycopg2.connect(
-            host=os.getenv('DB_HOST'),
-            database='avatarex_db',
-            user=os.getenv('DB_USER'),
-            password=os.getenv('DB_PASSWORD')
-        )
-        cur = conn.cursor()
         cur.execute("SELECT * FROM home_statuses WHERE pipeline_id_id=%s", (self.table_id,))
         resp = cur.fetchall()
-        conn.close()
         statuses = []
         for r in resp:
             if r[4] is False:
@@ -73,16 +97,8 @@ class RequestSettings:
         self.block_statuses = statuses
 
     def _get_data_from_amocrm_db_pipelines(self, pipeline_id):
-        conn = psycopg2.connect(
-            host=os.getenv('DB_HOST'),
-            database='avatarex_db',
-            user=os.getenv('DB_USER'),
-            password=os.getenv('DB_PASSWORD')
-        )
-        cur = conn.cursor()
         cur.execute("SELECT * FROM home_pipelines WHERE p_id=%s", (pipeline_id,))
         resp = cur.fetchone()
-        conn.close()
         self.table_id = resp[1]
         self.working_mode = resp[0]
         self.id = resp[2]
@@ -103,19 +119,11 @@ class RequestSettings:
         self.results_count = resp[21]
 
     def _get_data_from_amocrm_db_settings(self, user_id):
-        conn = psycopg2.connect(
-            host=os.getenv('DB_HOST'),
-            database='avatarex_db',
-            user=os.getenv('DB_USER'),
-            password=os.getenv('DB_PASSWORD')
-        )
-        cur = conn.cursor()
         cur.execute("SELECT * FROM home_amoconnect WHERE user_id=%s;", (user_id,))
         info = cur.fetchone()
         cur.execute('SELECT * FROM home_gptapikey WHERE user_id=%s;', (user_id,))
         info2 = cur.fetchone()
         self.openai_api_key = info2[1]
-        conn.close()
         self.user, self.password, self.host, self.amo_key = info[1], info[3], info[2], info[4]
 
 
@@ -163,6 +171,15 @@ async def get_messages(lead_id, request_settings: RequestSettings):
     return messages
 
 
+def get_bots_answers_count(lead_id) -> int:
+    message_objects = session.query(Messages).filter_by(lead_id=lead_id).all()[::-1]
+    count = 0
+    for m in message_objects:
+        if m.is_bot:
+            count += 1
+
+    return count
+
 
 async def add_new_message(message_id, message, lead_id, is_bot):
     obj = Messages(id=message_id, message=message, lead_id=lead_id, is_bot=is_bot)
@@ -187,5 +204,6 @@ async def clear_history(pipeline_id):
 async def message_already_exists(message_id):
     result = session.query(Messages).filter_by(id=message_id).first()
     return True if result else False
+
 
 Base.metadata.create_all(engine)

@@ -1,9 +1,10 @@
 import json
-import os
 import time
 
 import bs4
 import requests
+
+import db
 
 
 def get_token(host, mail, password):
@@ -33,18 +34,16 @@ def get_token(host, mail, password):
         response = session.post(f'{host}oauth2/authorize', headers=headers, data=payload)
         access_token = response.cookies.get('access_token')
         refresh_token = response.cookies.get('refresh_token')
-        print(access_token)
-        print(refresh_token)
         headers['access_token'], headers['refresh_token'] = access_token, refresh_token
         payload = {'request[chats][session][action]': 'create'}
         headers['Host'] = host_2
         response = session.post(f'{host}ajax/v1/chats/session', headers=headers, data=payload)
         token = response.json()['response']['chats']['session']['access_token']
     except Exception as e:
-        print(e)
+
         time.sleep(3)
         return get_token(host, mail, password)
-    print('Amo Token:', token)
+
     return token, session, headers
 
 
@@ -93,11 +92,78 @@ def send_message(receiver_id: str, message: str, account_chat_id, host, mail, pa
             url = f'https://amojo.amocrm.ru/v1/chats/{account_chat_id}/' \
                   f'{receiver_id}/messages?with_video=true&stand=v15'
             response = requests.post(url, headers=headers, data=json.dumps({"text": message}))
-            print(response.status_code)
+
             if response.status_code != 200:
                 raise Exception("Токен не подошел!")
         except Exception as e:
-            print(e, 2)
+
             token, session, _ = get_token(host, mail, password)
             continue
         break
+
+
+
+
+def create_field(host: str, mail: str, password: str, name: str):
+    token, session, headers = get_token(host, mail, password)
+
+    url = f'{host}ajax/settings/custom_fields/'
+    data = {
+        'action': 'apply_changes',
+        'cf[add][0][element_type]': 2,
+        'cf[add][0][sortable]': True,
+        'cf[add][0][groupable]': True,
+        'cf[add][0][predefined]': False,
+        'cf[add][0][type_id]': 1,
+        'cf[add][0][name]': name,
+        'cf[add][0][disabled]': '',
+        'cf[add][0][settings][formula]': '',
+        'cf[add][0][pipeline_id]': 0
+    }
+    session.post(url, headers=headers, data=data)
+
+
+def get_field_by_name(name: str, host: str, mail: str, password: str, lead_id: int) -> (bool, int):
+    url = f'{host}leads/detail/{lead_id}'
+    token, session, headers = get_token(host, mail, password)
+    response = session.get(url)
+    if f'"NAME":"{name}"' not in response.text:
+        return False, 0
+    return True, int(response.text.split(f',"NAME":"{name}"')[0].split('"ID":')[-1])
+
+
+def set_field_by_name(param_id: int, host: str, mail: str, password: str, value: str, lead_id: int, pipeline_id: int):
+    url = f'{host}ajax/leads/detail/'
+    data = {
+        f'CFV[{param_id}]': value,
+        'lead[STATUS]': '',
+        'lead[PIPELINE_ID]': pipeline_id,
+        'ID': lead_id
+    }
+    token, session, headers = get_token(host, mail, password)
+    response = session.post(url, headers=headers, data=data)
+    print(response.text)
+
+
+def fill_field(name, value, host, mail, password, lead_id, pipeline_id):
+    exists, param_id = get_field_by_name(name, host, mail, password, lead_id)
+    if not exists:
+        create_field(host, mail, password, name)
+        _, param_id = get_field_by_name(name, host, mail, password, lead_id)
+    set_field_by_name(param_id, host, mail, password, value, lead_id, pipeline_id)
+
+
+def get_field_info(q_m: db.QualificationMode, host, mail, password, lead_id):
+    all_fields_qualified, first_uncompleted_field_description, second_uncompleted_field_description, first_field_name = True, '', '', ''
+    for k in q_m.q_rules.keys():
+        exists, field_id = get_field_by_name(k, host, mail, password, lead_id)
+        if not exists:
+            all_fields_qualified = False
+            if first_uncompleted_field_description == '':
+                first_field_name = k
+                first_uncompleted_field_description = q_m.q_rules[k]
+            else:
+                second_uncompleted_field_description = q_m.q_rules[k]
+                break
+
+    return all_fields_qualified, first_uncompleted_field_description, second_uncompleted_field_description, first_field_name
