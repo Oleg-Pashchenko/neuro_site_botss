@@ -9,6 +9,7 @@ import pandas as pd
 import openai
 from mods import db_with_amo_cards
 
+
 async def get_openai_response(request_settings: db.RequestSettings, lead_id, message, user_id_hash):
     model = request_settings.ft_model if request_settings.ft_model != '' else request_settings.model
     openai.api_key = request_settings.openai_api_key
@@ -30,7 +31,7 @@ async def get_openai_response(request_settings: db.RequestSettings, lead_id, mes
 
         response_text = execute_db_mode(message, request_settings)
         amo_methods.send_message(user_id_hash, response_text, request_settings.amo_key, request_settings.host,
-                             request_settings.user, request_settings.password)
+                                 request_settings.user, request_settings.password)
         return response_text
 
 
@@ -126,9 +127,6 @@ def get_keywords_values(message, filename):
         return {'is_ok': False, 'args': {}}
 
 
-
-
-
 def execute_db_mode(request_message, request_settings: db.RequestSettings):
     rules = request_settings.work_rule
     db_name = 'files/' + request_settings.filename
@@ -151,5 +149,3 @@ def execute_db_mode(request_message, request_settings: db.RequestSettings):
             return answer_messages['success'] + '\n' + prepared_message
     else:
         return answer_messages['openai_error']
-
-
