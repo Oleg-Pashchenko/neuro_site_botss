@@ -60,11 +60,12 @@ def get_answer_by_question(question, filename):
     return answer
 
 
-def get_keywords_values(message, func):
+def get_keywords_values(message, func, request_settings):
     messages = [
         {'role': 'system', 'content': 'Give answer:'},
         {"role": "user",
          "content": message}]
+    openai.api_key = request_settings.openai_api_key
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo-0613",
         messages=messages,
@@ -90,10 +91,10 @@ def perephrase(message):
     return response['choices'][0]['message']['content']
 
 
-def question_mode(user_message, filename, db_error_message, openai_error_message):
+def question_mode(user_message, filename, db_error_message, openai_error_message, request_settings):
     print('Получено сообщение:', user_message)
     func = get_question_db_function(filename)
-    response = get_keywords_values(user_message, func)
+    response = get_keywords_values(user_message, func, request_settings)
 
     if not response['is_ok']:
         return openai_error_message
@@ -107,9 +108,9 @@ def question_mode(user_message, filename, db_error_message, openai_error_message
     return response
 
 
-def check_question_answer(question, answer):
+def check_question_answer(question, answer, request_settings):
     func = get_check_question_answer_db_function(question)
-    resp = get_keywords_values(f"{answer}", func)
+    resp = get_keywords_values(f"{answer}", func, request_settings)
     return resp
 
 
@@ -122,22 +123,29 @@ def execute(message, request_settings: db.RequestSettings, lead_id, user_id_hash
     if bot_answers_count == 0:
         is_first_message = True
 
-    if is_first_message:
-        print("Это первое сообщение от пользователя")
-        resp = perephrase(q_m.hi_message)
-        amo_methods.send_message(user_id_hash, resp, request_settings.amo_key, request_settings.host,
-                                 request_settings.user, request_settings.password)
-        return resp
-
     all_fields_qualified, first_uncompleted_field_description, \
         second_uncompleted_field_description, first_field_name = amo_methods.get_field_info(q_m, request_settings.host,
                                                                                             request_settings.user,
                                                                                             request_settings.password,
                                                                                             lead_id)
 
+    if is_first_message:
+        print("Это первое сообщение от пользователя")
+        resp = perephrase(q_m.hi_message)
+        amo_methods.send_message(user_id_hash, resp, request_settings.amo_key, request_settings.host,
+                                 request_settings.user, request_settings.password)
+
+        if first_field_name != '':
+            question = perephrase(first_uncompleted_field_description)
+            amo_methods.send_message(user_id_hash, question, request_settings.amo_key, request_settings.host,
+                                     request_settings.user, request_settings.password)
+            return f"{resp}\n\n{question}"
+        return resp
+
+
     if not all_fields_qualified:
         print('Остались неквалифицированные поля')
-        answer_correct = check_question_answer(first_uncompleted_field_description, message)
+        answer_correct = check_question_answer(first_uncompleted_field_description, message, request_settings)
 
         if answer_correct['is_ok'] is True and answer_correct['args']['is_correct'] is True:
             amo_methods.fill_field(first_field_name, message, request_settings.host, request_settings.user,
@@ -151,7 +159,7 @@ def execute(message, request_settings: db.RequestSettings, lead_id, user_id_hash
             return question
 
     print('Похоже мне задали вопрос!')
-    answer = question_mode(message, filename, q_m.db_error_message, q_m.openai_error_message)
+    answer = question_mode(message, filename, q_m.db_error_message, q_m.openai_error_message, request_settings)
 
     amo_methods.send_message(user_id_hash, answer, request_settings.amo_key, request_settings.host,
                              request_settings.user, request_settings.password)
