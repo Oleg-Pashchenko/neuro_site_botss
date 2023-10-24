@@ -61,18 +61,21 @@ def get_answer_by_question(question, filename):
 
 
 def get_keywords_values(message, func, request_settings):
-    messages = [
-        {'role': 'system', 'content': 'Give answer:'},
-        {"role": "user",
-         "content": message}]
-    openai.api_key = request_settings.openai_api_key
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo-0613",
-        messages=messages,
-        functions=func,
-        function_call="auto"
-    )
-    response_message = response["choices"][0]["message"]
+    try:
+        messages = [
+            {'role': 'system', 'content': 'Give answer:'},
+            {"role": "user",
+             "content": message}]
+        openai.api_key = request_settings.openai_api_key
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo-0613",
+            messages=messages,
+            functions=func,
+            function_call="auto"
+        )
+        response_message = response["choices"][0]["message"]
+    except:
+        return {'is_ok': False, 'args': {}}
     if response_message.get("function_call"):
         function_args = json.loads(response_message["function_call"]["arguments"])
         return {'is_ok': True, 'args': function_args}
@@ -81,14 +84,17 @@ def get_keywords_values(message, func, request_settings):
 
 
 def perephrase(message):
-    response = openai.ChatCompletion.create(
-        model='gpt-3.5-turbo',
-        messages=[{"role": "system", "content": 'Перефразируй'},
-                  {'role': 'user', 'content': message}],
-        max_tokens=4000,
-        temperature=1
-    )
-    return response['choices'][0]['message']['content']
+    try:
+        response = openai.ChatCompletion.create(
+            model='gpt-3.5-turbo',
+            messages=[{"role": "system", "content": 'Перефразируй'},
+                      {'role': 'user', 'content': message}],
+            max_tokens=4000,
+            temperature=1
+        )
+        return response['choices'][0]['message']['content']
+    except:
+        return message
 
 
 def question_mode(user_message, filename, db_error_message, openai_error_message, request_settings):
