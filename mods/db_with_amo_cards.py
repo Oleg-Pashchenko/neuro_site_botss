@@ -103,10 +103,10 @@ def question_mode(user_message, filename, db_error_message, openai_error_message
     response = get_keywords_values(user_message, func, request_settings)
 
     if not response['is_ok']:
-        return openai_error_message
+        return perephrase(openai_error_message)
     answer = get_answer_by_question(response['args']['Question'], filename)
     if answer is None:
-        return db_error_message
+        return perephrase(db_error_message)
     print("Квалифицирован вопрос:", response['args']['Question'])
     print('Получен ответ из базы данных:', answer)
     response = perephrase(answer)
